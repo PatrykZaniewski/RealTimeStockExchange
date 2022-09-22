@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import "log"
 
 func main() {
-	fmt.Println("hello world")
+	EnvInit()
+	err := PublishMessage("XD")
+	if err != nil {
+		return
+	}
+	err = InitPubSubConsumer()
+	if err != nil {
+		log.Fatalf("PubSub init error occured: %s", err)
+	}
 }

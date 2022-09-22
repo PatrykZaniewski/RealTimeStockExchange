@@ -1,0 +1,4 @@
+cloud:
+  projectId: citric-campaign-349210
+  ordersTopicId: orders
+  ordersSubscriptionId: orders-sub

@@ -1,0 +1,17 @@
+pubSubListenerType: pull
+pubSubPublisherType: push
+pubSubPublisherLocal: True
+
+cloud:
+  stock:
+    projectId: citric-campaign-349210
+    pricesTopicId: core.prices
+    ordersSubscriptionId: core.prices.sub
+  broker:
+    projectId: citric-campaign-349210
+    internalPricesTopicId: broker.internal.prices
+
+rest:
+  broker:
+    core: http://mock.com
+    stream: http://mock.com

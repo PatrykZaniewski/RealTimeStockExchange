@@ -1,10 +1,13 @@
 package main
 
-import "log"
+import (
+	"log"
+	configModel "stock/stock_exchange_core/config/model"
+)
 
 func main() {
-	EnvInit()
-	err := PublishMessage("XD")
+	configModel.ConfigSetup()
+	err := PublishMessage("XD", "XD", "XD")
 	if err != nil {
 		return
 	}
@@ -12,4 +15,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("PubSub init error occured: %s", err)
 	}
+	HandleRequests()
 }

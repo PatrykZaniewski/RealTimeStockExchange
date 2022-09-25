@@ -4,32 +4,44 @@ import (
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
-	"github.com/spf13/viper"
-	"log"
+	config "stock/stock_exchange_core/config/model"
 )
 
-func PublishMessage(msg string) error {
+func PublishOrdersStatus(brokerId, msg string) error {
+	abc := config.StockConfig.Rest
+	fmt.Println(abc)
+	return nil
+}
 
-	projectID, ok := viper.Get("cloud.projectid").(string)
+type Price struct {
+	Value int
+	Name  string
+}
 
-	if !ok {
-		log.Fatalf("No value for cloud.projectid")
-	}
-	ordersTopicId, ok := viper.Get("cloud.orderstopicid").(string)
-	if !ok {
-		log.Fatalf("No value for cloud.orderstopicid")
-	}
+func PublishPrices() {
+
+}
+
+func PublishMessage(projectId, topicID string, msg interface{}) error {
+	projectId = "citric-campaign-349210"
+	topicID = "orders"
 
 	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, projectID)
+	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {
 		return fmt.Errorf("pubsub: NewClient: %v", err)
 	}
 	defer client.Close()
 
-	t := client.Topic(ordersTopicId)
+	t := client.Topic(topicID)
+	//pri := &Price{
+	//	Value: 15,
+	//	Name:  "ABC",
+	//}
+	//mes, err := json.Marshal(pri)
+	fmt.Println("XD")
 	result := t.Publish(ctx, &pubsub.Message{
-		Data: []byte(msg),
+		Data: []byte("A"),
 	})
 
 	id, err := result.Get(ctx)

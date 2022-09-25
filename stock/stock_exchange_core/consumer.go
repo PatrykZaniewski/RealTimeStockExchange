@@ -18,10 +18,10 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 }
 
 func InitPubSubConsumer() error {
-	projectID, ok := viper.Get("cloud.projectid").(string)
+	projectID, ok := viper.Get("cloud.stock.projectid").(string)
 
 	if !ok {
-		log.Fatalf("No value for cloud.projectid")
+		log.Fatalf("No value for cloud.stock.projectid")
 	}
 	ordersSubscriptionId, ok := viper.Get("cloud.orderssubscriptionid").(string)
 	if !ok {

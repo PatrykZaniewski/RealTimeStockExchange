@@ -1,4 +1,22 @@
-cloud:
-  projectId: citric-campaign-349210
-  ordersTopicId: orders
-  ordersSubscriptionId: orders-sub
+pubsub:
+  listenerType: pull
+  publisherType: push
+  publisherLocal: True
+  stock:
+    projectId: citric-campaign-349210
+    publisher:
+      pricesTopicId: core.prices
+    consumer:
+      internalOrdersTopicId: core.internal.orders
+      internalOrdersSubId: core.internal.orders.sub
+  broker:
+    - id: common_broker
+      projectId: mock_broker_project_id
+      publisher:
+        ordersStatusTopicId: broker.internal.prices
+rest:
+  port: 5005
+
+debug:
+  rest:
+    orderStatusCollectorPort: 8001

@@ -1,11 +1,11 @@
-package main
+package pubsub
 
 import (
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
-	"github.com/spf13/viper"
-	"log"
+	config "stock/stock_exchange_core/config/env"
+	"sync"
 	"sync/atomic"
 )
 
@@ -17,25 +17,19 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	msg.Ack()
 }
 
-func InitPubSubConsumer() error {
-	projectID, ok := viper.Get("cloud.stock.projectid").(string)
-
-	if !ok {
-		log.Fatalf("No value for cloud.stock.projectid")
-	}
-	ordersSubscriptionId, ok := viper.Get("cloud.orderssubscriptionid").(string)
-	if !ok {
-		log.Fatalf("No value for cloud.orderssubscriptionid")
-	}
+func initOrdersConsumer() error {
+	pubSubConfig := config.AppConfig.PubSub
+	projectId := pubSubConfig.Stock.ProjectId
+	subscriptionId := pubSubConfig.Stock.Consumer.InternalOrdersSubId
 
 	ctx := context.Background()
-	client, err := pubsub.NewClient(ctx, projectID)
+	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {
 		_ = fmt.Errorf("PubSub connection error: %v", err)
 	}
 	defer client.Close()
 
-	sub := client.Subscription(ordersSubscriptionId)
+	sub := client.Subscription(subscriptionId)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -45,5 +39,14 @@ func InitPubSubConsumer() error {
 		return fmt.Errorf("sub.Receive: %v", err)
 	}
 
+	return nil
+}
+
+func InitConsumers(wg *sync.WaitGroup) error {
+	defer wg.Done()
+	err := initOrdersConsumer()
+	if err != nil {
+		return err
+	}
 	return nil
 }

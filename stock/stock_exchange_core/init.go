@@ -1,19 +1,18 @@
 package main
 
 import (
-	"log"
-	configModel "stock/stock_exchange_core/config/model"
+	config "stock/stock_exchange_core/config/env"
+	"stock/stock_exchange_core/interface/pubsub"
+	"stock/stock_exchange_core/interface/rest"
+	"sync"
 )
 
 func main() {
-	configModel.ConfigSetup()
-	err := PublishMessage("XD", "XD", "XD")
-	if err != nil {
-		return
-	}
-	err = InitPubSubConsumer()
-	if err != nil {
-		log.Fatalf("PubSub init error occured: %s", err)
-	}
-	HandleRequests()
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	config.ConfigSetup()
+	go pubsub.InitConsumers(&wg)
+	go rest.HandleRequests(&wg)
+	wg.Wait()
 }

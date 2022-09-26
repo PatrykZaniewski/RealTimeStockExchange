@@ -1,12 +1,14 @@
-package main
+package rest
 
 import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 )
 
-func HandleRequests() {
+func HandleRequests(wg *sync.WaitGroup) {
+	defer wg.Done()
 	http.HandleFunc("/", homePage)
 	log.Fatal(http.ListenAndServe(":5005", nil))
 }

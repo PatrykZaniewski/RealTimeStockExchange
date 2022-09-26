@@ -1,17 +1,12 @@
-package model
+package env
 
 import (
 	"github.com/spf13/viper"
 	"log"
+	configModel "stock/stock_exchange_core/config/env/model"
 )
 
-type Config struct {
-	Rest   RestConfig   `mapstructure:"rest"`
-	Debug  DebugConfig  `mapstructure:"debug"`
-	PubSub PubSubConfig `mapstructure:"pubsub"`
-}
-
-var StockConfig Config
+var AppConfig configModel.Config
 
 func ConfigSetup() {
 	viper.SetConfigName("settings")
@@ -23,11 +18,11 @@ func ConfigSetup() {
 		log.Fatalf("Error occured during env set. Err: %s", err)
 	}
 
-	err := viper.Unmarshal(&StockConfig)
+	err := viper.Unmarshal(&AppConfig)
 	if err != nil {
 		return
 	}
-	err = viper.Unmarshal(&StockConfig)
+	err = viper.Unmarshal(&AppConfig)
 	if err != nil {
 		return
 	}

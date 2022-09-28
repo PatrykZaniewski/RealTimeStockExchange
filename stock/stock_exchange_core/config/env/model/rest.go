@@ -1,5 +1,10 @@
 package model
 
 type RestConfig struct {
-	Port int `mapstructure:"port"`
+	Broker []RestBrokerConfig `mapstructure:"broker"`
+}
+
+type RestBrokerConfig struct {
+	Id           string `mapstructure:"id"`
+	ordersStatus string `mapstructure:"ordersStatus"`
 }

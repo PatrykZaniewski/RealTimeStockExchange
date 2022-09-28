@@ -3,7 +3,7 @@ package env
 import (
 	"github.com/spf13/viper"
 	"log"
-	configModel "stock/stock_exchange_core/config/env/model"
+	configModel "stock/order_collector/config/env/model"
 )
 
 var AppConfig configModel.Config

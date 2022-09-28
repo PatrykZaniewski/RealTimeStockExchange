@@ -1,7 +1,3 @@
-firestore:
-  stock:
-    projectId: citric-campaign-349210
-
 pubsub:
   listenerType: pull
   publisherType: push
@@ -9,20 +5,17 @@ pubsub:
   stock:
     projectId: citric-campaign-349210
     publisher:
-      pricesTopicId: core.prices
-    consumer:
       internalOrdersTopicId: core.internal.orders
-      internalOrdersSubId: core.internal.orders.sub
+    consumer:
+      brokerMockOrdersTopicId: broker_mock.orders
+      brokerMockOrdersSubId: broker_mock.orders.sub
   broker:
     - id: common_broker
       projectId: mock_broker_project_id
-      publisher:
-        ordersStatusTopicId: broker.orders.status
-
+      consumer: broker.pending_orders
 rest:
-  broker:
-    - id: common_broker
-      ordersStatus: http://mock.com
+  stock:
+    stockExchangeCore: http://mock.com
 
 general:
   rest:

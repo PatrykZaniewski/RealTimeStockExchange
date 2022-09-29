@@ -11,12 +11,14 @@ pubsub:
       brokerMockOrdersSubId: broker_mock.orders.sub
   broker:
     - id: common_broker
-      projectId: mock_broker_project_id
-      consumer: broker.pending_orders
+      projectId: my-second-project-364017
+      consumer:
+        brokerPendingOrdersTopicId: broker.pending_orders
+        brokerPendingOrdersSubId: broker.pending_orders.sub
 rest:
   stock:
     stockExchangeCore: http://mock.com
 
 general:
   rest:
-    port: 5005
+    port: 5006

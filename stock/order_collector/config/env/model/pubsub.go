@@ -15,20 +15,21 @@ type PubSubStockConfig struct {
 }
 
 type PubSubBrokerConfig struct {
-	Id        string                      `mapstructure:"id"`
-	ProjectId string                      `mapstructure:"projectId"`
-	Publisher PubSubBrokerPublisherConfig `mapstructure:"publisher"`
+	Id        string                     `mapstructure:"id"`
+	ProjectId string                     `mapstructure:"projectId"`
+	Consumer  PubSubBrokerConsumerConfig `mapstructure:"consumer"`
 }
 
 type PubSubStockPublisherConfig struct {
-	PricesTopicId string `mapstructure:"pricesTopicId"`
+	InternalOrdersTopicId string `mapstructure:"internalOrdersTopicId"`
 }
 
 type PubSubStockConsumerConfig struct {
-	InternalOrdersTopicId string `mapstructure:"internalOrdersTopicId"`
-	InternalOrdersSubId   string `mapstructure:"internalOrdersSubId"`
+	BrokerMockOrdersTopicId string `mapstructure:"brokerMockOrdersTopicId"`
+	BrokerMockOrdersSubId   string `mapstructure:"brokerMockOrdersSubId"`
 }
 
-type PubSubBrokerPublisherConfig struct {
-	OrdersStatusTopicId string `mapstructure:"ordersStatusTopicId"`
+type PubSubBrokerConsumerConfig struct {
+	BrokerPendingOrdersTopicId string `mapstructure:"brokerPendingOrdersTopicId"`
+	BrokerPendingOrdersSubId   string `mapstructure:"brokerPendingOrdersSubId"`
 }

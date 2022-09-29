@@ -5,23 +5,22 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	config "stock/stock_exchange_core/config/env"
-	"stock/stock_exchange_core/domain/model"
+	config "stock/order_collector/config/env"
 )
 
-func PublishPrices(newPrice model.Price) error {
+func PublishOrder(data string) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
-	topicId := pubSubConfig.Stock.Publisher.PricesTopicId
+	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId
 
-	err := PublishMessage(projectId, topicId, newPrice)
+	err := publishMessage(projectId, topicId, data)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func PublishMessage(projectId, topicID string, msg interface{}) error {
+func publishMessage(projectId, topicID string, msg interface{}) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {

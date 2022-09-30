@@ -1,10 +1,10 @@
 package rest
 
 import (
+	config "broker/order_executor/config/env"
 	"fmt"
 	"log"
 	"net/http"
-	config "stock/order_collector/config/env"
 	"sync"
 )
 

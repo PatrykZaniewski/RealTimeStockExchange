@@ -1,31 +1,22 @@
 package pubsub
 
 import (
+	config "broker/order_executor/config/env"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
-	config "stock/order_collector/config/env"
 	"sync"
 )
 
 func InitConsumers(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	initBrokerConsumers()
-	initMockOrdersConsumer()
+	initBrokerConsumer()
 	return nil
 }
 
-func initBrokerConsumers() error {
-	brokersPubSubConfigs := config.AppConfig.PubSub.Broker
-	for _, brokerPubSubConfig := range brokersPubSubConfigs {
-		initConsumer(brokerPubSubConfig.ProjectId, brokerPubSubConfig.Consumer.BrokerPendingOrdersSubId, ordersCallback)
-	}
-	return nil
-}
-
-func initMockOrdersConsumer() error {
-	stockPubSubConfig := config.AppConfig.PubSub.Stock
-	initConsumer(stockPubSubConfig.ProjectId, stockPubSubConfig.Consumer.BrokerMockOrdersSubId, ordersCallback)
+func initBrokerConsumer() error {
+	brokersPubSubConfig := config.AppConfig.PubSub.Broker
+	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalOrdersSubId, ordersCallback)
 	return nil
 }
 

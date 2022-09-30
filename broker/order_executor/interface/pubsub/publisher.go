@@ -1,17 +1,17 @@
 package pubsub
 
 import (
+	config "broker/order_executor/config/env"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
-	config "stock/order_collector/config/env"
 )
 
 func PublishOrder(data string) error {
 	pubSubConfig := config.AppConfig.PubSub
-	projectId := pubSubConfig.Stock.ProjectId
-	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId
+	projectId := pubSubConfig.Broker.ProjectId
+	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
 
 	err := publishMessage(projectId, topicId, data)
 	if err != nil {

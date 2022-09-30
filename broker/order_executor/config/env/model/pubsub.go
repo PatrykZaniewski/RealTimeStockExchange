@@ -7,28 +7,17 @@ type PubSubConfig struct {
 	Broker         PubSubBrokerConfig `mapstructure:"broker"`
 }
 
-type PubSubStockConfig struct {
-	ProjectId string                     `mapstructure:"projectId"`
-	Publisher PubSubStockPublisherConfig `mapstructure:"publisher"`
-	Consumer  PubSubStockConsumerConfig  `mapstructure:"consumer"`
-}
-
 type PubSubBrokerConfig struct {
-	Id        string                     `mapstructure:"id"`
-	ProjectId string                     `mapstructure:"projectId"`
-	Consumer  PubSubBrokerConsumerConfig `mapstructure:"consumer"`
+	ProjectId string                      `mapstructure:"projectId"`
+	Publisher PubSubBrokerPublisherConfig `mapstructure:"publisher"`
+	Consumer  PubSubBrokerConsumerConfig  `mapstructure:"consumer"`
 }
 
-type PubSubStockPublisherConfig struct {
-	InternalOrdersTopicId string `mapstructure:"internalOrdersTopicId"`
-}
-
-type PubSubStockConsumerConfig struct {
-	BrokerMockOrdersTopicId string `mapstructure:"brokerMockOrdersTopicId"`
-	BrokerMockOrdersSubId   string `mapstructure:"brokerMockOrdersSubId"`
+type PubSubBrokerPublisherConfig struct {
+	BrokerPendingOrdersTopicId string `mapstructure:"brokerPendingOrdersTopicId"`
 }
 
 type PubSubBrokerConsumerConfig struct {
-	BrokerPendingOrdersTopicId string `mapstructure:"brokerPendingOrdersTopicId"`
-	BrokerPendingOrdersSubId   string `mapstructure:"brokerPendingOrdersSubId"`
+	BrokerInternalOrdersTopicId string `mapstructure:"brokerInternalOrdersTopicId"`
+	BrokerInternalOrdersSubId   string `mapstructure:"brokerInternalOrdersSubId"`
 }

@@ -1,0 +1,20 @@
+pubsub:
+  listenerType: pull
+  publisherType: push
+  publisherLocal: True
+  broker:
+    projectId: my-second-project-364017
+    publisher:
+      brokerPendingOrdersTopicId: broker.pending_orders
+    consumer:
+      brokerInternalClientOrdersTopicId: broker.internal_orders
+      brokerInternalClientOrdersSubId: broker.internal_orders.sub
+
+
+rest:
+  stock:
+    orderCollector: http://mock.com
+
+general:
+  rest:
+    port: 5010

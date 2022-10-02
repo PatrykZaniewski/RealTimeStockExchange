@@ -1,7 +1,7 @@
 package pubsub
 
 import (
-	config "broker/order_executor/config/env"
+	config "broker/broker_core/config/env"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"

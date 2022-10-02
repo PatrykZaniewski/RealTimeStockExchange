@@ -18,6 +18,6 @@ type PubSubBrokerPublisherConfig struct {
 }
 
 type PubSubBrokerConsumerConfig struct {
-	BrokerInternalOrdersTopicId string `mapstructure:"brokerInternalOrdersTopicId"`
-	BrokerInternalOrdersSubId   string `mapstructure:"brokerInternalOrdersSubId"`
+	BrokerInternalClientOrdersTopicId string `mapstructure:"brokerInternalClientOrdersTopicId"`
+	BrokerInternalClientOrdersSubId   string `mapstructure:"brokerInternalClientOrdersSubId"`
 }

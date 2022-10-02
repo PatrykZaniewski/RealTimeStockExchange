@@ -1,7 +1,7 @@
 package env
 
 import (
-	configModel "broker/order_executor/config/env/model"
+	configModel "broker/broker_core/config/env/model"
 	"github.com/spf13/viper"
 	"log"
 )

@@ -1,9 +1,17 @@
 package main
 
 import (
-	"fmt"
+	config "broker/broker_core/config/env"
+	"broker/broker_core/interface/pubsub"
+	"broker/broker_core/interface/rest"
+	"sync"
 )
 
 func main() {
-	fmt.Println("hello world")
+	var wg sync.WaitGroup
+	wg.Add(2)
+	config.ConfigSetup()
+	go pubsub.InitConsumers(&wg)
+	go rest.HandleRequests(&wg)
+	wg.Wait()
 }

@@ -5,5 +5,5 @@ type RestConfig struct {
 }
 
 type RestStockConfig struct {
-	OrderCollector string `mapstructure:"orderCollector"`
+	OrderExecutor string `mapstructure:"orderExecutor"`
 }

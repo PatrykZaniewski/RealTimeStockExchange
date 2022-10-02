@@ -3,7 +3,6 @@ package database
 import (
 	"cloud.google.com/go/firestore"
 	"context"
-	"fmt"
 	"log"
 	config "stock/stock_exchange_core/config/env"
 )
@@ -20,8 +19,6 @@ func ProceedDbOperation() {
 			return err
 		}
 		pop, err := doc.DataAt("population")
-		tmp, err := ref.Get(ctx)
-		fmt.Println(tmp)
 		if err != nil {
 			return err
 		}

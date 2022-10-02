@@ -41,7 +41,6 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	fmt.Println("XD")
 	err = sub.Receive(ctx, callback)
 	if err != nil {
 		return fmt.Errorf("sub.Receive: %v", err)

@@ -1,7 +1,7 @@
 package pubsub
 
 import (
-	config "broker/order_executor/config/env"
+	config "broker/broker_core/config/env"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
@@ -16,7 +16,7 @@ func InitConsumers(wg *sync.WaitGroup) error {
 
 func initBrokerConsumer() error {
 	brokersPubSubConfig := config.AppConfig.PubSub.Broker
-	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalOrdersSubId, ordersCallback)
+	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalClientOrdersSubId, ordersCallback)
 	return nil
 }
 
@@ -32,7 +32,6 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	fmt.Println("XD")
 	err = sub.Receive(ctx, callback)
 	if err != nil {
 		return fmt.Errorf("sub.Receive: %v", err)

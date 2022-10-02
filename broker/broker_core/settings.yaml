@@ -5,16 +5,15 @@ pubsub:
   broker:
     projectId: my-second-project-364017
     publisher:
-      brokerPendingOrdersTopicId: broker.pending_orders
+      brokerPendingOrdersTopicId: broker.internal.orders
     consumer:
-      brokerInternalClientOrdersTopicId: broker.internal_orders
-      brokerInternalClientOrdersSubId: broker.internal_orders.sub
-
+      brokerInternalClientOrdersTopicId: broker.internal.client_orders
+      brokerInternalClientOrdersSubId: broker.internal.client_orders.sub
 
 rest:
   stock:
-    orderCollector: http://mock.com
+    orderExecutor: http://mock.com
 
 general:
   rest:
-    port: 5010
+    port: 5011

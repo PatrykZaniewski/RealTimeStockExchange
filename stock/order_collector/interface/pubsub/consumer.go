@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	config "stock/order_collector/config/env"
+	"stock/order_collector/domain/model"
 	"sync"
 )
 
@@ -50,7 +51,11 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 }
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	PublishOrder(string(msg.Data))
+	tmp := model.Order{
+		AssetName: "ABC",
+		Quantity:  3.5,
+	}
+	PublishOrder(&tmp)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

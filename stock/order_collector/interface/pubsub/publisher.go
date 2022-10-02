@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	config "stock/order_collector/config/env"
+	"stock/order_collector/domain/model"
 )
 
-func PublishOrder(data string) error {
+func PublishOrder(data *model.Order) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
 	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId

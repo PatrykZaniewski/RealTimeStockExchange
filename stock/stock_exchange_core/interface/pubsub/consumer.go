@@ -3,15 +3,18 @@ package pubsub
 import (
 	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"fmt"
 	config "stock/stock_exchange_core/config/env"
+	"stock/stock_exchange_core/domain/model"
 	"sync"
 	"sync/atomic"
 )
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var received int32
-
+	var order model.Order
+	json.Unmarshal([]byte(msg.Data), &order)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	atomic.AddInt32(&received, 1)
 	msg.Ack()

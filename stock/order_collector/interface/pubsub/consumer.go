@@ -3,6 +3,7 @@ package pubsub
 import (
 	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"fmt"
 	config "stock/order_collector/config/env"
 	"stock/order_collector/domain/model"
@@ -51,11 +52,9 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 }
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	tmp := model.Order{
-		AssetName: "ABC",
-		Quantity:  3.5,
-	}
-	PublishOrder(&tmp)
+	var order model.Order
+	json.Unmarshal(msg.Data, &order)
+	PublishOrder(&order)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

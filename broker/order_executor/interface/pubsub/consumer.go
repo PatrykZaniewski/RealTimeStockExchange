@@ -2,8 +2,10 @@ package pubsub
 
 import (
 	config "broker/order_executor/config/env"
+	"broker/order_executor/domain/model"
 	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 )
@@ -41,7 +43,9 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 }
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	PublishOrder(string(msg.Data))
+	var order model.Order
+	json.Unmarshal(msg.Data, &order)
+	PublishOrder(&order)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

@@ -1,0 +1,20 @@
+firestore:
+  broker:
+    projectId: my-second-project-364017
+
+pubsub:
+  listenerType: pull
+  publisherType: push
+  publisherLocal: True
+  broker:
+    projectId: my-second-project-364017
+    publisher:
+      brokerInternalClientOrdersTopicId: broker.internal.client_orders
+
+rest:
+  stock:
+    brokerCore: http://mock.com
+
+general:
+  rest:
+    port: 5012

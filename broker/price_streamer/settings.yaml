@@ -2,15 +2,11 @@ pubsub:
   listenerType: pull
   publisherType: push
   publisherLocal: True
-  stock:
-    projectId: citric-campaign-349210
-    consumer:
-      corePricesTopicId: core.prices
-      corePricesSubId: core.prices.sub
   broker:
     projectId: my-second-project-364017
-    publisher:
+    consumer:
       brokerInternalPricesTopicId: broker.internal.prices
+      brokerInternalPricesSubId: broker.internal.prices.streamer.sub
 
 rest:
   broker:
@@ -19,4 +15,4 @@ rest:
 
 general:
   rest:
-    port: 5013
+    port: 5014

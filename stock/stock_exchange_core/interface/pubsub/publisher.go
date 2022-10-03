@@ -9,7 +9,7 @@ import (
 	"stock/stock_exchange_core/domain/model"
 )
 
-func PublishPrices(newPrice model.Price) error {
+func PublishPrices(newPrice *model.Price) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
 	topicId := pubSubConfig.Stock.Publisher.PricesTopicId

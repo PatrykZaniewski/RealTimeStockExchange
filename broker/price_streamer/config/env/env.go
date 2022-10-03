@@ -1,12 +1,14 @@
-package main
+package env
 
 import (
-	"log"
-
+	configModel "broker/price_streamer/config/env/model"
 	"github.com/spf13/viper"
+	"log"
 )
 
-func EnvInit() {
+var AppConfig configModel.Config
+
+func ConfigSetup() {
 	viper.SetConfigName("settings")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
@@ -14,5 +16,10 @@ func EnvInit() {
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error occured during env set. Err: %s", err)
+	}
+
+	err := viper.Unmarshal(&AppConfig)
+	if err != nil {
+		return
 	}
 }

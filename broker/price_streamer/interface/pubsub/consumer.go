@@ -1,31 +1,22 @@
 package pubsub
 
 import (
+	config "broker/price_streamer/config/env"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
-	config "stock/stock_exchange_core/config/env"
-	"stock/stock_exchange_core/domain/model"
 	"sync"
-	"sync/atomic"
 )
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	var received int32
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
-	var price = model.Price{
-		Asset: "QWE",
-		Price: 123.12,
-	}
-	PublishPrices(&price)
-	atomic.AddInt32(&received, 1)
 	msg.Ack()
 }
 
 func initOrdersConsumer() error {
 	pubSubConfig := config.AppConfig.PubSub
-	projectId := pubSubConfig.Stock.ProjectId
-	subscriptionId := pubSubConfig.Stock.Consumer.InternalOrdersSubId
+	projectId := pubSubConfig.Broker.ProjectId
+	subscriptionId := pubSubConfig.Broker.Consumer.BrokerInternalPricesSubId
 
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)

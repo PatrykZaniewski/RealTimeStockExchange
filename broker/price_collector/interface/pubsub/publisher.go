@@ -1,27 +1,27 @@
 package pubsub
 
 import (
-	config "broker/broker_core/config/env"
-	"broker/broker_core/domain/model"
+	config "broker/price_collector/config/env"
+	"broker/price_collector/domain/model"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
 )
 
-func PublishOrder(order *model.Order) error {
+func PublishPrices(newPrice *model.Price) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Broker.ProjectId
-	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
+	topicId := pubSubConfig.Broker.Publisher.BrokerInternalPricesTopicId
 
-	err := publishMessage(projectId, topicId, order)
+	err := PublishMessage(projectId, topicId, newPrice)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func publishMessage(projectId, topicID string, msg interface{}) error {
+func PublishMessage(projectId, topicID string, msg interface{}) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {

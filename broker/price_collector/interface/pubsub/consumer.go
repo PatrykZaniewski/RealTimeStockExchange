@@ -1,31 +1,27 @@
 package pubsub
 
 import (
+	config "broker/price_collector/config/env"
+	"broker/price_collector/domain/model"
 	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"fmt"
-	config "stock/stock_exchange_core/config/env"
-	"stock/stock_exchange_core/domain/model"
 	"sync"
-	"sync/atomic"
 )
 
-func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	var received int32
+func pricesCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
-	var price = model.Price{
-		Asset: "QWE",
-		Price: 123.12,
-	}
+	var price model.Price
+	json.Unmarshal(msg.Data, &price)
 	PublishPrices(&price)
-	atomic.AddInt32(&received, 1)
 	msg.Ack()
 }
 
 func initOrdersConsumer() error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
-	subscriptionId := pubSubConfig.Stock.Consumer.InternalOrdersSubId
+	subscriptionId := pubSubConfig.Stock.Consumer.CorePricesSubId
 
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
@@ -39,7 +35,7 @@ func initOrdersConsumer() error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	err = sub.Receive(ctx, ordersCallback)
+	err = sub.Receive(ctx, pricesCallback)
 	if err != nil {
 		return fmt.Errorf("sub.Receive: %v", err)
 	}

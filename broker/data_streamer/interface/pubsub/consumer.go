@@ -1,7 +1,8 @@
 package pubsub
 
 import (
-	config "broker/price_streamer/config/env"
+	config "broker/data_streamer/config/env"
+	"broker/data_streamer/interface/websocket"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	websocket.PublishMessage("XD")
 	msg.Ack()
 }
 

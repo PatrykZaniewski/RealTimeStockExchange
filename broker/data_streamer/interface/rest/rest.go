@@ -1,7 +1,8 @@
 package rest
 
 import (
-	config "broker/price_streamer/config/env"
+	config "broker/data_streamer/config/env"
+	wb "broker/data_streamer/interface/websocket"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 func HandleRequests(wg *sync.WaitGroup) {
 	defer wg.Done()
 	generalConfig := config.AppConfig.General
+	http.HandleFunc("/ws", wb.Websocket)
 	http.HandleFunc("/", homePage)
 	log.Fatal(http.ListenAndServe(":"+generalConfig.Rest.Port, nil))
 }

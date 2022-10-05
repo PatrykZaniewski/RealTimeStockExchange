@@ -1,7 +1,7 @@
 package env
 
 import (
-	configModel "broker/price_streamer/config/env/model"
+	configModel "broker/data_streamer/config/env/model"
 	"github.com/spf13/viper"
 	"log"
 )

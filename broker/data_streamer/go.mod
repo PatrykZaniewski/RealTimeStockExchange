@@ -1,9 +1,10 @@
-module broker/price_streamer
+module broker/data_streamer
 
 go 1.18
 
 require (
 	cloud.google.com/go/pubsub v1.25.1
+	github.com/gorilla/websocket v1.5.0
 	github.com/spf13/viper v1.13.0
 )
 

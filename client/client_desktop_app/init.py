@@ -6,7 +6,8 @@ from asyncio import coroutine
 import rel as rel
 import websocket as websocket
 from PyQt5.QtCore import QTimer, QObject, pyqtSignal, QRunnable, pyqtSlot, QThreadPool
-from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QLabel, QPushButton, QMainWindow
+from PyQt5.QtWidgets import QApplication, QVBoxLayout, QWidget, QLabel, QPushButton, QMainWindow, QHBoxLayout
+
 
 class Listener:
     def __init__(self, tekst):
@@ -27,7 +28,6 @@ class Listener:
 
 
 def hello(tekst):
-    websocket.enableTrace(True)
     list = Listener(tekst)
     ws = websocket.WebSocketApp("ws://localhost:5014/ws",
                                 on_open=list.on_open,
@@ -36,14 +36,8 @@ def hello(tekst):
                                 on_close=list.on_close)
 
     ws.run_forever()  # Set dispatcher to automatic reconnection
-    # rel.signal(2, rel.abort)  # Keyboard Interrupt
-    # rel.dispatch()
 
-class WorkerSignals(QObject):
-    finished = pyqtSignal()
-    error = pyqtSignal(tuple)
-    result = pyqtSignal(object)
-    progress = pyqtSignal(int)
+
 
 
 class Worker(QRunnable):
@@ -54,7 +48,6 @@ class Worker(QRunnable):
         self.fn = fn
         self.args = args
         self.kwargs = kwargs
-        self.signals = WorkerSignals()
 
     @pyqtSlot()
     def run(self):
@@ -69,24 +62,66 @@ class Worker(QRunnable):
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.setFixedWidth(400)
+        self.setFixedHeight(400)
 
-        self.counter = 0
+        v_layout = QVBoxLayout()
 
-        layout = QVBoxLayout()
+        h_layout_asseco = QHBoxLayout()
+        h_layout_asseco.setObjectName("asseco")
+        h_layout_comarch = QHBoxLayout()
+        h_layout_comarch.setObjectName("comarch")
+        h_layout_cdproject = QHBoxLayout()
+        h_layout_cdproject.setObjectName("cdproject")
 
-        self.l = QLabel("Start")
-        self.l.setText("XD")
+        asseco_label = QLabel("ASSECO")
+        asseco_buy_price = QLabel("100.00")
+        asseco_sell_price = QLabel("90.00")
+        asseco_buy = QPushButton("BUY!")
+        asseco_sell = QPushButton("SELL!")
+        h_layout_asseco.addWidget(asseco_label)
+        h_layout_asseco.addWidget(asseco_buy_price)
+        h_layout_asseco.addWidget(asseco_sell_price)
+        h_layout_asseco.addWidget(asseco_buy)
+        h_layout_asseco.addWidget(asseco_sell)
+
+        comarch_label = QLabel("COMARCH")
+        comarch_buy_price = QLabel("200.00")
+        comarch_sell_price = QLabel("190.00")
+        comarch_buy = QPushButton("BUY!")
+        comarch_sell = QPushButton("SELL!")
+        h_layout_comarch.addWidget(comarch_label)
+        h_layout_comarch.addWidget(comarch_buy_price)
+        h_layout_comarch.addWidget(comarch_sell_price)
+        h_layout_comarch.addWidget(comarch_buy)
+        h_layout_comarch.addWidget(comarch_sell)
+
+        cdproject_label = QLabel("CD PROJECT")
+        cdproject_buy_price = QLabel("300.00")
+        cdproject_sell_price = QLabel("290.00")
+        cdproject_buy = QPushButton("BUY!")
+        cdproject_sell = QPushButton("SELL!")
+        h_layout_cdproject.addWidget(cdproject_label)
+        h_layout_cdproject.addWidget(cdproject_buy_price)
+        h_layout_cdproject.addWidget(cdproject_sell_price)
+        h_layout_cdproject.addWidget(cdproject_buy)
+        h_layout_cdproject.addWidget(cdproject_sell)
+
+        # self.l = QLabel("Start")
+        # self.l.setText("XD")
+
         b = QPushButton("DANGER!")
         b.pressed.connect(self.oh_no)
 
-        layout.addWidget(self.l)
-        layout.addWidget(b)
+        # v_layout.addWidget(self.l)
+        # v_layout.addWidget(b)
+
+        v_layout.addLayout(h_layout_asseco)
+        v_layout.addLayout(h_layout_comarch)
+        v_layout.addLayout(h_layout_cdproject)
 
         w = QWidget()
-        w.setLayout(layout)
-
-        self.setFixedWidth(500)
-        self.setFixedHeight(500)
+        w.setLayout(v_layout)
 
         self.setCentralWidget(w)
 
@@ -94,20 +129,9 @@ class MainWindow(QMainWindow):
 
         self.threadpool = QThreadPool()
 
-        self.timer = QTimer()
-        self.timer.setInterval(1000)
-        self.timer.timeout.connect(self.recurring_timer)
-        self.timer.start()
-
     def oh_no(self):
-        # Pass the function to execute
-        worker = Worker(hello, tekst=self.l)  # Any other args, kwargs are passed to the run function
-        # Execute
+        worker = Worker(hello, tekst=self.l)
         self.threadpool.start(worker)
-
-    def recurring_timer(self):
-        self.counter += 1
-        self.l.setText("Counter: %d" % self.counter)
 
 
 if __name__ == "__main__":

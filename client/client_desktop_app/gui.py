@@ -1,7 +1,9 @@
 import traceback
+from functools import partial
 from typing import Optional
 
 from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QMainWindow, QLineEdit, QLayout, \
     QApplication
 
@@ -51,9 +53,9 @@ class MainWindow(QMainWindow):
 
         self.show()
 
-        self.threadpool = QThreadPool()
-        worker = QWorker(init_websocket_connection)
-        self.threadpool.start(worker)
+        # self.threadpool = QThreadPool()
+        # worker = QWorker(init_websocket_connection)
+        # self.threadpool.start(worker)
 
     def init_assets(self, asset_name: str) -> QHBoxLayout:
         h_layout = QHBoxLayout()
@@ -64,15 +66,21 @@ class MainWindow(QMainWindow):
         buy_price.setObjectName("buy_price")
         sell_price = QLabel()
         sell_price.setObjectName("sell_price")
+        validator = QIntValidator()
+        validator.setRange(0, 100)
         sell_amount = QLineEdit()
+        sell_amount.setValidator(validator)
         buy_amount = QLineEdit()
+        buy_amount.setValidator(validator)
         buy = QPushButton("BUY!")
-        buy.pressed.connect(lambda: process_order(asset_name, int(buy_amount.text()), OrderType.BUY))
+        buy.pressed.connect(lambda: self._process_order(asset_name, buy_amount, OrderType.BUY))
         sell = QPushButton("SELL!")
-        sell.pressed.connect(lambda: process_order(asset_name, int(sell_amount.text()), OrderType.SELL))
+        sell.pressed.connect(lambda: self._process_order(asset_name, sell_amount, OrderType.SELL))
         h_layout.addWidget(label)
         h_layout.addWidget(buy_price)
         h_layout.addWidget(sell_price)
+        h_layout.addWidget(buy_amount)
+        h_layout.addWidget(sell_amount)
         h_layout.addWidget(buy)
         h_layout.addWidget(sell)
 
@@ -91,5 +99,7 @@ class MainWindow(QMainWindow):
             if layout.itemAt(i).widget().objectName() == "sell_price":
                 layout.itemAt(i).widget().setText(asset_data.get("sell_price"))
 
+    def _process_order(self, asset_name: str, amount: QLineEdit, order_type: OrderType):
+        process_order(asset_name, amount.text(), order_type)
 
 

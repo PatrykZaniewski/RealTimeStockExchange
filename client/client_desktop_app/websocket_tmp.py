@@ -13,7 +13,7 @@ class QClient(QtCore.QObject):
         self.client = QtWebSockets.QWebSocket()
         self.client.textMessageReceived.connect(self.on_message)
 
-        self.client.open(QUrl("ws://localhost:5014"))
+        self.client.open(QUrl("ws://localhost:5014/ws"))
 
     def on_message(self, message):
         message = json.loads(message)

@@ -2,5 +2,6 @@ package model
 
 type Order struct {
 	AssetName string
-	Quantity  float64
+	Quantity  int
+	OrderType string
 }

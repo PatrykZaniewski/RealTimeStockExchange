@@ -1,14 +1,11 @@
 import traceback
-from functools import partial
 from typing import Optional
 
-from PyQt5.QtCore import QThreadPool, QRunnable, pyqtSlot
+from PyQt5.QtCore import QRunnable, pyqtSlot
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QMainWindow, QLineEdit, QLayout, \
-    QApplication
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QMainWindow, QLineEdit, QApplication
 
 from client.client_desktop_app.business_logic import process_order, OrderType
-from client.client_desktop_app.websocket_configuration import init_websocket_connection
 
 
 def get_main_window():
@@ -101,5 +98,3 @@ class MainWindow(QMainWindow):
 
     def _process_order(self, asset_name: str, amount: QLineEdit, order_type: OrderType):
         process_order(asset_name, amount.text(), order_type)
-
-

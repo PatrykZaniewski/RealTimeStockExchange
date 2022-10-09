@@ -1,4 +1,5 @@
 import json
+import os
 
 from PyQt5 import QtCore, QtWebSockets
 from PyQt5.QtCore import QUrl
@@ -12,8 +13,13 @@ class QClient(QtCore.QObject):
 
         self.client = QtWebSockets.QWebSocket()
         self.client.textMessageReceived.connect(self.on_message)
+        self.client.connected.connect(self.on_connected)
 
-        self.client.open(QUrl("ws://localhost:5014/ws"))
+        self.client.open(QUrl(os.getenv("data_streamer_websocket")))
+
+    def on_connected(self):
+        pass
+        self.client.sendBinaryMessage(str.encode(os.getenv("identifier")))
 
     def on_message(self, message):
         message = json.loads(message)

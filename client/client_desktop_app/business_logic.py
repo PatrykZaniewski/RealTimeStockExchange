@@ -1,4 +1,5 @@
 import dataclasses
+import os
 from dataclasses import dataclass
 from enum import Enum
 
@@ -21,5 +22,5 @@ class Order:
 
 def process_order(asset_name: str, amount: int, order_type: OrderType):
     order = Order(asset_name, int(amount), order_type.value)
-    requests.post(url="http://localhost:5012/order", data=order.to_json())
-    pass
+    requests.post(url=f"{os.getenv('data_streamer_websocket')}/order", data=order.to_json(),
+                  headers={"id": os.getenv("identifier")})

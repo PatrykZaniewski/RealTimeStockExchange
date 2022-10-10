@@ -11,7 +11,13 @@ import (
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
-	websocket.PublishMessage("XD")
+	d := map[string]string{
+		"buy_price":  "635.74",
+		"name":       "CDPROJECT",
+		"sell_price": "539.34",
+		"identifier": "broker_client_1",
+	}
+	websocket.PublishMessage(d)
 	msg.Ack()
 }
 

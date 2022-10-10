@@ -2,51 +2,34 @@ package websocket
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 )
 
-var upgrader = websocket.Upgrader{}
+var upgrade = websocket.Upgrader{}
 
-var tmp []*websocket.Conn
+var connections = make(map[string]*websocket.Conn)
 
 func Websocket(w http.ResponseWriter, r *http.Request) {
-	fmt.Print("XD")
-	c, err := upgrader.Upgrade(w, r, nil)
-	fmt.Print("XD2")
+	c, err := upgrade.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
-	fmt.Print("XD3")
-	tmp = append(tmp, c)
 	defer c.Close()
 	for {
-		mt, message, err := c.ReadMessage()
+		_, message, err := c.ReadMessage()
 		if err != nil {
-			log.Println("read:", err)
+			log.Println("error:", err)
 			break
 		}
-		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, []byte("Witam"))
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
+		log.Printf("Register: %s", message)
+		connections[string(message)] = c
 	}
 }
 
-func PublishMessage(data string) {
-	if len(tmp) > 0 {
-		d := map[string]string{
-			"buy_price":  "635.74",
-			"name":       "CDPROJECT",
-			"sell_price": "539.34",
-		}
-		res, _ := json.Marshal(d)
-		tmp[0].WriteMessage(websocket.TextMessage, res)
-
-	}
+func PublishMessage(data map[string]string) {
+	res, _ := json.Marshal(data)
+	connections[data["identifier"]].WriteMessage(websocket.TextMessage, res)
 }

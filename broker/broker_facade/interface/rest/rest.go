@@ -6,7 +6,6 @@ import (
 	"broker/broker_facade/interface/pubsub"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
@@ -21,19 +20,28 @@ func HandleRequests(wg *sync.WaitGroup) {
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
-	var order = model.Order{
-		AssetName: "ABC",
-		Quantity:  13,
-	}
-	pubsub.PublishOrder(&order)
-	fmt.Println("Endpoint Hit: homePage")
+	fmt.Println("Endpoint Hit: InternalOrder")
 }
 
 func order(w http.ResponseWriter, r *http.Request) {
-	message, _ := ioutil.ReadAll(r.Body)
-	var order model.Order
-	json.Unmarshal(message, &order)
-	pubsub.PublishOrder(&order)
-	fmt.Println(order)
+	//message, _ := ioutil.ReadAll(r.Body)
+	//var order model.FacadeOrder
+	//json.Unmarshal(message, &order)
+	//pubsub.PublishOrder(&order)
+	//fmt.Println(order)
+	fmt.Println("Endpoint Hit: InternalOrder")
+	var client = r.Header.Get("identifier")
+	var facadeOrder model.FacadeOrder
+	json.NewDecoder(r.Body).Decode(&facadeOrder)
+	var internalOrder = model.InternalOrder{
+		AssetName:    facadeOrder.AssetName,
+		Quantity:     facadeOrder.Quantity,
+		OrderType:    facadeOrder.OrderType,
+		OrderSubtype: facadeOrder.OrderSubtype,
+		ClientId:     client,
+		Id:           facadeOrder.Id,
+	}
+
+	pubsub.PublishOrder(&internalOrder)
+	fmt.Println(internalOrder)
 }

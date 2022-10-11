@@ -9,7 +9,7 @@ import (
 	"stock/order_collector/domain/model"
 )
 
-func PublishOrder(data *model.Order) error {
+func PublishOrder(data *model.StockOrder) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
 	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId

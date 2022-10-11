@@ -1,6 +1,11 @@
 package model
 
-type Order struct {
-	AssetName string
-	Quantity  float64
+type StockOrder struct {
+	AssetName    string
+	Quantity     int
+	OrderType    string
+	OrderSubtype string
+	ClientId     string
+	BrokerId     string
+	Id           string
 }

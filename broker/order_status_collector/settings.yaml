@@ -1,0 +1,22 @@
+pubsub:
+  listenerType: pull
+  publisherType: push
+  publisherLocal: True
+  stock:
+    projectId: citric-campaign-349210
+    consumer:
+      corePricesTopicId: core.prices
+      corePricesSubId: core.prices.sub
+  broker:
+    projectId: my-second-project-364017
+    publisher:
+      brokerInternalPricesTopicId: broker.internal.prices
+
+rest:
+  broker:
+    brokerCore: http://mock.com
+    priceStreamer: http://mock.com
+
+general:
+  rest:
+    port: 5013

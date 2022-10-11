@@ -9,7 +9,7 @@ import (
 	"fmt"
 )
 
-func PublishOrder(order *model.Order) error {
+func PublishOrder(order *model.StockOrder) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Broker.ProjectId
 	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId

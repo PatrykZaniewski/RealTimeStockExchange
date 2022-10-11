@@ -21,6 +21,21 @@ func PublishPrices(newPrice *model.Price) error {
 	return nil
 }
 
+func PublishOrderStatus(orderStatus *model.OrderStatus) error {
+	pubSubBrokerConfigs := config.AppConfig.PubSub.Broker
+
+	for _, pubSubBrokerConfig := range pubSubBrokerConfigs {
+		if pubSubBrokerConfig.Id == orderStatus.BrokerId {
+			err := PublishMessage(pubSubBrokerConfig.ProjectId, pubSubBrokerConfig.Publisher.OrdersStatusTopicId, orderStatus)
+			if err != nil {
+				return err
+			}
+			break
+		}
+	}
+	return nil
+}
+
 func PublishMessage(projectId, topicID string, msg interface{}) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)

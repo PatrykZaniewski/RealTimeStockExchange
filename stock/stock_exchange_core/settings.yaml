@@ -15,7 +15,7 @@ pubsub:
       internalOrdersSubId: core.internal.orders.sub
   broker:
     - id: common_broker
-      projectId: mock_broker_project_id
+      projectId: my-second-project-364017
       publisher:
         ordersStatusTopicId: broker.orders.status
 

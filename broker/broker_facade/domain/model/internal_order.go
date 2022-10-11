@@ -1,11 +1,10 @@
 package model
 
-type StockOrder struct {
+type InternalOrder struct {
 	AssetName    string
 	Quantity     int
 	OrderType    string
 	OrderSubtype string
 	ClientId     string
-	BrokerId     string
 	Id           string
 }

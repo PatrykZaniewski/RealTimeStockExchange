@@ -1,3 +1,4 @@
+identity: broker_1
 pubsub:
   listenerType: pull
   publisherType: push

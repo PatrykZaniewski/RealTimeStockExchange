@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -5,6 +6,7 @@ from PyQt5 import QtCore, QtWebSockets
 from PyQt5.QtCore import QUrl
 
 from client.client_desktop_app.gui import get_main_window, MainWindow
+from client.client_desktop_app.model.order_status import OrderStatus
 
 
 class QClient(QtCore.QObject):
@@ -23,7 +25,11 @@ class QClient(QtCore.QObject):
 
     def on_message(self, message):
         message = json.loads(message)
-        print(message)
+        if message['type'] == "PRICE":
+            print(message)
+        elif message['type'] == 'ORDER':
+            status = OrderStatus(**message)
+            print(f"{status.id},RECEIVED,{datetime.datetime.now()}")
         main_window: MainWindow = get_main_window()
         main_window.update_price(message)
         self.client.ping(b"ping")

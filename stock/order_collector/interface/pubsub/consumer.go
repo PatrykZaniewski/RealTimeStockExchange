@@ -52,7 +52,7 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 }
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	var order model.Order
+	var order model.StockOrder
 	json.Unmarshal(msg.Data, &order)
 	PublishOrder(&order)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))

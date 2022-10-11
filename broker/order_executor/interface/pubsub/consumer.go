@@ -43,9 +43,20 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 }
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	var order model.Order
-	json.Unmarshal(msg.Data, &order)
-	PublishOrder(&order)
+	appConfig := config.AppConfig
+
+	var internalOrder model.InternalOrder
+	json.Unmarshal(msg.Data, &internalOrder)
+	var stockOrder = model.StockOrder{
+		AssetName:    internalOrder.AssetName,
+		Quantity:     internalOrder.Quantity,
+		OrderType:    internalOrder.OrderType,
+		OrderSubtype: internalOrder.OrderSubtype,
+		ClientId:     internalOrder.ClientId,
+		BrokerId:     appConfig.Identity,
+		Id:           internalOrder.Id,
+	}
+	PublishOrder(&stockOrder)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

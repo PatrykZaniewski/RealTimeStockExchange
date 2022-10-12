@@ -18,9 +18,9 @@ func InitConsumers(wg *sync.WaitGroup) error {
 
 func initBrokerConsumer() error {
 	brokersPubSubConfig := config.AppConfig.PubSub.Broker
-	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalClientOrdersSubId, ordersCallback)
-	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalOrdersStatusSubId, ordersStatusCallback)
-	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalPricesSubId, pricesCallback)
+	go initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalClientOrdersSubId, ordersCallback)
+	go initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalOrdersStatusSubId, ordersStatusCallback)
+	go initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalPricesSubId, pricesCallback)
 	return nil
 }
 

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication
 from dotenv import load_dotenv
 
 from client.client_desktop_app.gui import MainWindow
-from client.client_desktop_app.websocket_tmp import QClient
+from client.client_desktop_app.websocket_setup import QClient
 
 
 if __name__ == "__main__":

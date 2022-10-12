@@ -15,7 +15,7 @@ type PubSubBrokerConfig struct {
 
 type PubSubBrokerPublisherConfig struct {
 	BrokerPendingOrdersTopicId            string `mapstructure:"brokerPendingOrdersTopicId"`
-	brokerInternalCoreOrdersStatusTopicId string `mapstructure:"brokerInternalCoreOrdersStatusTopicId"`
+	BrokerInternalCoreOrdersStatusTopicId string `mapstructure:"brokerInternalCoreOrdersStatusTopicId"`
 }
 
 type PubSubBrokerConsumerConfig struct {

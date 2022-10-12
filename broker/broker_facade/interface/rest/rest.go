@@ -24,11 +24,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func order(w http.ResponseWriter, r *http.Request) {
-	//message, _ := ioutil.ReadAll(r.Body)
-	//var order model.FacadeOrder
-	//json.Unmarshal(message, &order)
-	//pubsub.PublishOrder(&order)
-	//fmt.Println(order)
 	fmt.Println("Endpoint Hit: InternalOrder")
 	var client = r.Header.Get("identifier")
 	var facadeOrder model.FacadeOrder

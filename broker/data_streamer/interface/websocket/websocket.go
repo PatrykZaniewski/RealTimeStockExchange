@@ -33,13 +33,13 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 func PublishOrderStatusMessage(data *model.OrderStatus) {
 	var connection = connections[data.ClientId]
 	if connection != nil {
-		res, _ := json.Marshal(data)
+		res, _ := json.Marshal(model.OrderStatusMessage{"ORDER_STATUS", *data})
 		connection.WriteMessage(websocket.TextMessage, res)
 	}
 }
 
 func PublishPriceMessage(data *model.Price) {
-	res, _ := json.Marshal(data)
+	res, _ := json.Marshal(model.PriceMessage{"PRICE", *data})
 	for _, connection := range connections {
 		connection.WriteMessage(websocket.TextMessage, res)
 	}

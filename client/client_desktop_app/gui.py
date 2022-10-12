@@ -60,8 +60,10 @@ class MainWindow(QMainWindow):
 
         label = QLabel(asset_name)
         buy_price = QLabel()
+        buy_price.setText("100.00")
         buy_price.setObjectName("buy_price")
         sell_price = QLabel()
+        sell_price.setText("50.00")
         sell_price.setObjectName("sell_price")
         validator = QIntValidator()
         validator.setRange(0, 100)
@@ -86,15 +88,15 @@ class MainWindow(QMainWindow):
     def update_price(self, asset_data):
         layout: Optional[QHBoxLayout] = None
         for i in range(self.v_layout.count()):
-            if self.v_layout.itemAt(i).layout().objectName() == asset_data.get("name"):
+            if self.v_layout.itemAt(i).layout().objectName() == asset_data.get("AssetName"):
                 layout = self.v_layout.itemAt(i).layout()
                 break
 
         for i in range(layout.count()):
             if layout.itemAt(i).widget().objectName() == "buy_price":
-                layout.itemAt(i).widget().setText(asset_data.get("buy_price"))
+                layout.itemAt(i).widget().setText(str(asset_data.get("BuyPrice")))
             if layout.itemAt(i).widget().objectName() == "sell_price":
-                layout.itemAt(i).widget().setText(asset_data.get("sell_price"))
+                layout.itemAt(i).widget().setText(str(asset_data.get("SellPrice")))
 
     def _process_order(self, asset_name: str, amount: QLineEdit, price: QLabel, order_type: OrderType):
         process_order(asset_name, int(amount.text()), float(price.text()), order_type)

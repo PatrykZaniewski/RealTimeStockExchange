@@ -24,7 +24,7 @@ func PublishOrder(order *model.InternalOrder) error {
 func PublishOrderStatus(order *model.OrderStatus) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Broker.ProjectId
-	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
+	topicId := pubSubConfig.Broker.Publisher.BrokerInternalCoreOrdersStatusTopicId
 
 	err := publishMessage(projectId, topicId, order)
 	if err != nil {

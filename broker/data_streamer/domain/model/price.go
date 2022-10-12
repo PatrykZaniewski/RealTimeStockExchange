@@ -5,3 +5,8 @@ type Price struct {
 	BuyPrice  float32
 	SellPrice float32
 }
+
+type PriceMessage struct {
+	Type string
+	Price
+}

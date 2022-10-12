@@ -18,3 +18,8 @@ type OrderStatus struct {
 	Id           string
 	Status       OrderStatusEnum
 }
+
+type OrderStatusMessage struct {
+	Type string
+	OrderStatus
+}

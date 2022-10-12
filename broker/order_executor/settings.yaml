@@ -1,4 +1,4 @@
-identity: broker_1
+identity: common_broker
 pubsub:
   listenerType: pull
   publisherType: push

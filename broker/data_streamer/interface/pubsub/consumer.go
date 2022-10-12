@@ -62,7 +62,7 @@ func initOrderStatusConsumer() error {
 
 func InitConsumers(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	initOrderStatusConsumer()
-	initPriceConsumer()
+	go initPriceConsumer()
+	go initOrderStatusConsumer()
 	return nil
 }

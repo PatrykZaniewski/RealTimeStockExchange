@@ -25,13 +25,13 @@ class QClient(QtCore.QObject):
 
     def on_message(self, message):
         message = json.loads(message)
-        if message['type'] == "PRICE":
+        if message['Type'] == "PRICE":
             print(message)
-        elif message['type'] == 'ORDER':
-            status = OrderStatus(**message)
-            print(f"{status.id},RECEIVED,{datetime.datetime.now()}")
-        main_window: MainWindow = get_main_window()
-        main_window.update_price(message)
+            main_window: MainWindow = get_main_window()
+            main_window.update_price(message)
+        elif message['Type'] == 'ORDER_STATUS':
+            # status = OrderStatus(**message)
+            print(f"{message['Id']},RECEIVED,{datetime.datetime.timestamp(datetime.datetime.now())}")
         self.client.ping(b"ping")
 
     def close(self):

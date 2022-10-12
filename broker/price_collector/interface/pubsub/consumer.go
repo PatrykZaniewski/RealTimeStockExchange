@@ -18,7 +18,7 @@ func pricesCallback(_ context.Context, msg *pubsub.Message) {
 	msg.Ack()
 }
 
-func initOrdersConsumer() error {
+func initPricesConsumer() error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
 	subscriptionId := pubSubConfig.Stock.Consumer.CorePricesSubId
@@ -45,7 +45,7 @@ func initOrdersConsumer() error {
 
 func InitConsumers(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	err := initOrdersConsumer()
+	err := initPricesConsumer()
 	if err != nil {
 		return err
 	}

@@ -18,11 +18,7 @@ func ordersStatusCallback(_ context.Context, msg *pubsub.Message) {
 	msg.Ack()
 }
 
-func initOrdersStatusConsumer() error {
-	pubSubConfig := config.AppConfig.PubSub
-	projectId := pubSubConfig.Broker.ProjectId
-	subscriptionId := pubSubConfig.Broker.Consumer.BrokerOrdersSubId
-
+func initConsumer(projectId, subId string, callback func(context.Context, *pubsub.Message)) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {
@@ -30,12 +26,12 @@ func initOrdersStatusConsumer() error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subscriptionId)
+	sub := client.Subscription(subId)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	err = sub.Receive(ctx, ordersStatusCallback)
+	err = sub.Receive(ctx, callback)
 	if err != nil {
 		return fmt.Errorf("sub.Receive: %v", err)
 	}
@@ -43,11 +39,17 @@ func initOrdersStatusConsumer() error {
 	return nil
 }
 
+func initOrdersStatusConsumer() error {
+	pubSubConfig := config.AppConfig.PubSub
+	projectId := pubSubConfig.Broker.ProjectId
+	subscriptionId := pubSubConfig.Broker.Consumer.BrokerOrdersSubId
+
+	initConsumer(projectId, subscriptionId, ordersStatusCallback)
+	return nil
+}
+
 func InitConsumers(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	err := initOrdersStatusConsumer()
-	if err != nil {
-		return err
-	}
+	initOrdersStatusConsumer()
 	return nil
 }

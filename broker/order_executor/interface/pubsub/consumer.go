@@ -52,6 +52,7 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 		Quantity:     internalOrder.Quantity,
 		OrderType:    internalOrder.OrderType,
 		OrderSubtype: internalOrder.OrderSubtype,
+		OrderPrice:   internalOrder.OrderPrice,
 		ClientId:     internalOrder.ClientId,
 		BrokerId:     appConfig.Identity,
 		Id:           internalOrder.Id,

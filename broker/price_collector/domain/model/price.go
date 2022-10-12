@@ -1,6 +1,7 @@
 package model
 
 type Price struct {
-	Asset string
-	Price float32
+	AssetName string
+	BuyPrice  float32
+	SellPrice float32
 }

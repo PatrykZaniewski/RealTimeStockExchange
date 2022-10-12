@@ -14,10 +14,15 @@ type PubSubBrokerConfig struct {
 }
 
 type PubSubBrokerPublisherConfig struct {
-	BrokerPendingOrdersTopicId string `mapstructure:"brokerPendingOrdersTopicId"`
+	BrokerPendingOrdersTopicId            string `mapstructure:"brokerPendingOrdersTopicId"`
+	brokerInternalCoreOrdersStatusTopicId string `mapstructure:"brokerInternalCoreOrdersStatusTopicId"`
 }
 
 type PubSubBrokerConsumerConfig struct {
 	BrokerInternalClientOrdersTopicId string `mapstructure:"brokerInternalClientOrdersTopicId"`
 	BrokerInternalClientOrdersSubId   string `mapstructure:"brokerInternalClientOrdersSubId"`
+	BrokerInternalOrdersStatusTopicId string `mapstructure:"brokerInternalOrdersStatusTopicId"`
+	BrokerInternalOrdersStatusSubId   string `mapstructure:"brokerInternalOrdersStatusSubId"`
+	BrokerInternalPricesTopicId       string `mapstructure:"brokerInternalPricesTopicId"`
+	BrokerInternalPricesSubId         string `mapstructure:"brokerInternalPricesSubId"`
 }

@@ -19,6 +19,8 @@ func InitConsumers(wg *sync.WaitGroup) error {
 func initBrokerConsumer() error {
 	brokersPubSubConfig := config.AppConfig.PubSub.Broker
 	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalClientOrdersSubId, ordersCallback)
+	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalOrdersStatusSubId, ordersStatusCallback)
+	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalPricesSubId, pricesCallback)
 	return nil
 }
 
@@ -46,6 +48,21 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var order model.InternalOrder
 	json.Unmarshal(msg.Data, &order)
 	PublishOrder(&order)
+	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	msg.Ack()
+}
+
+func ordersStatusCallback(_ context.Context, msg *pubsub.Message) {
+	var orderStatus model.OrderStatus
+	json.Unmarshal(msg.Data, &orderStatus)
+	PublishOrderStatus(&orderStatus)
+	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	msg.Ack()
+}
+
+func pricesCallback(_ context.Context, msg *pubsub.Message) {
+	var price model.Price
+	json.Unmarshal(msg.Data, &price)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

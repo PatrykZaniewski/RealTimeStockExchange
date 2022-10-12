@@ -38,6 +38,7 @@ func order(w http.ResponseWriter, r *http.Request) {
 		Quantity:     facadeOrder.Quantity,
 		OrderType:    facadeOrder.OrderType,
 		OrderSubtype: facadeOrder.OrderSubtype,
+		OrderPrice:   facadeOrder.OrderPrice,
 		ClientId:     client,
 		Id:           facadeOrder.Id,
 	}

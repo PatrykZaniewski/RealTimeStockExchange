@@ -6,9 +6,14 @@ pubsub:
     projectId: my-second-project-364017
     publisher:
       brokerPendingOrdersTopicId: broker.internal.orders
+      brokerInternalCoreOrdersStatusTopicId: broker.internal.core.orders_status
     consumer:
       brokerInternalClientOrdersTopicId: broker.internal.client_orders
       brokerInternalClientOrdersSubId: broker.internal.client_orders.sub
+      brokerInternalOrdersStatusTopicId: broker.internal.orders_status
+      brokerInternalOrdersStatusSubId: broker.internal.orders_status.sub
+      brokerInternalPricesTopicId: broker.internal.prices
+      brokerInternalPricesSubId: broker.internal.prices.core.sub
 
 rest:
   stock:

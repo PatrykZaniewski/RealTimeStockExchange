@@ -21,6 +21,18 @@ func PublishOrder(order *model.InternalOrder) error {
 	return nil
 }
 
+func PublishOrderStatus(order *model.OrderStatus) error {
+	pubSubConfig := config.AppConfig.PubSub
+	projectId := pubSubConfig.Broker.ProjectId
+	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
+
+	err := publishMessage(projectId, topicId, order)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func publishMessage(projectId, topicID string, msg interface{}) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)

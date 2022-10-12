@@ -22,9 +22,10 @@ class Order:
     quantity: int
     order_type: str
     order_subtype: str
+    order_price: float
     id: str
 
     @staticmethod
-    def create(asset_name: str, quantity: int, order_type: str, order_subtype: str):
-        return Order(asset_name, quantity, order_type, order_subtype, str(uuid.uuid4()))
+    def create(asset_name: str, quantity: int, price: float, order_type: str, order_subtype: str):
+        return Order(asset_name, quantity, order_type, order_subtype, price, str(uuid.uuid4()))
 

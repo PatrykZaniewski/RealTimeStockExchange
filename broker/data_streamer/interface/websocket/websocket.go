@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"broker/data_streamer/domain/model"
 	"encoding/json"
 	"github.com/gorilla/websocket"
 	"log"
@@ -29,7 +30,17 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PublishMessage(data map[string]string) {
+func PublishOrderStatusMessage(data *model.OrderStatus) {
+	var connection = connections[data.ClientId]
+	if connection != nil {
+		res, _ := json.Marshal(data)
+		connection.WriteMessage(websocket.TextMessage, res)
+	}
+}
+
+func PublishPriceMessage(data *model.Price) {
 	res, _ := json.Marshal(data)
-	connections[data["identifier"]].WriteMessage(websocket.TextMessage, res)
+	for _, connection := range connections {
+		connection.WriteMessage(websocket.TextMessage, res)
+	}
 }

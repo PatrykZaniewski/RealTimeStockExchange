@@ -70,9 +70,9 @@ class MainWindow(QMainWindow):
         buy_amount = QLineEdit()
         buy_amount.setValidator(validator)
         buy = QPushButton("BUY!")
-        buy.pressed.connect(lambda: self._process_order(asset_name, buy_amount, OrderType.BUY))
+        buy.pressed.connect(lambda: self._process_order(asset_name, buy_amount, buy_price, OrderType.BUY))
         sell = QPushButton("SELL!")
-        sell.pressed.connect(lambda: self._process_order(asset_name, sell_amount, OrderType.SELL))
+        sell.pressed.connect(lambda: self._process_order(asset_name, sell_amount, sell_price, OrderType.SELL))
         h_layout.addWidget(label)
         h_layout.addWidget(buy_price)
         h_layout.addWidget(sell_price)
@@ -96,5 +96,5 @@ class MainWindow(QMainWindow):
             if layout.itemAt(i).widget().objectName() == "sell_price":
                 layout.itemAt(i).widget().setText(asset_data.get("sell_price"))
 
-    def _process_order(self, asset_name: str, amount: QLineEdit, order_type: OrderType):
-        process_order(asset_name, amount.text(), order_type)
+    def _process_order(self, asset_name: str, amount: QLineEdit, price: QLabel, order_type: OrderType):
+        process_order(asset_name, int(amount.text()), float(price.text()), order_type)

@@ -5,6 +5,7 @@ type InternalOrder struct {
 	Quantity     int
 	OrderType    string
 	OrderSubtype string
+	OrderPrice   float32
 	ClientId     string
 	Id           string
 }

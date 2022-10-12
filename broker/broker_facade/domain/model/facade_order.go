@@ -5,5 +5,6 @@ type FacadeOrder struct {
 	Quantity     int
 	OrderType    string
 	OrderSubtype string
+	OrderPrice   float32
 	Id           string
 }

@@ -1,7 +1,7 @@
 package rest
 
 import (
-	config "broker/price_collector/config/env"
+	config "broker/order_status_collector/config/env"
 	"fmt"
 	"log"
 	"net/http"

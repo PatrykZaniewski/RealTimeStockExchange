@@ -7,6 +7,8 @@ pubsub:
     consumer:
       brokerInternalPricesTopicId: broker.internal.prices
       brokerInternalPricesSubId: broker.internal.prices.streamer.sub
+      brokerInternalCoreOrdersStatusTopicId: broker.internal.core.orders_status
+      brokerInternalCoreOrdersStatusSubId: broker.internal.core.orders_status.sub
 
 rest:
   broker:

@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
+	"math/rand"
 	config "stock/stock_exchange_core/config/env"
 	"stock/stock_exchange_core/domain/model"
 	"sync"
@@ -16,8 +18,9 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	json.Unmarshal(msg.Data, &stockOrder)
 
 	var price = model.Price{
-		Asset: "QWE",
-		Price: 123.12,
+		AssetName: stockOrder.AssetName,
+		BuyPrice:  float32(math.Round((rand.Float64()*100+600)*100) / 100),
+		SellPrice: float32(math.Round((rand.Float64()*100+600)*100) / 100),
 	}
 	PublishPrices(&price)
 
@@ -26,12 +29,12 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 		Quantity:     stockOrder.Quantity,
 		OrderType:    stockOrder.OrderType,
 		OrderSubtype: stockOrder.OrderSubtype,
+		OrderPrice:   stockOrder.OrderPrice,
 		ClientId:     stockOrder.ClientId,
 		BrokerId:     stockOrder.BrokerId,
 		Id:           stockOrder.Id,
 		Status:       model.FULFILLED,
 	}
-
 	PublishOrderStatus(&orderStatus)
 
 	msg.Ack()

@@ -2,30 +2,32 @@ package pubsub
 
 import (
 	config "broker/data_streamer/config/env"
+	"broker/data_streamer/domain/model"
 	"broker/data_streamer/interface/websocket"
 	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 )
 
-func ordersCallback(_ context.Context, msg *pubsub.Message) {
+func pricesCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
-	d := map[string]string{
-		"buy_price":  "635.74",
-		"name":       "CDPROJECT",
-		"sell_price": "539.34",
-		"identifier": "broker_client_1",
-	}
-	websocket.PublishMessage(d)
+	var price model.Price
+	json.Unmarshal(msg.Data, &price)
+	websocket.PublishPriceMessage(&price)
 	msg.Ack()
 }
 
-func initOrdersConsumer() error {
-	pubSubConfig := config.AppConfig.PubSub
-	projectId := pubSubConfig.Broker.ProjectId
-	subscriptionId := pubSubConfig.Broker.Consumer.BrokerInternalPricesSubId
+func orderStatusCallback(_ context.Context, msg *pubsub.Message) {
+	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	var orderStatus model.OrderStatus
+	json.Unmarshal(msg.Data, &orderStatus)
+	websocket.PublishOrderStatusMessage(&orderStatus)
+	msg.Ack()
+}
 
+func initConsumer(projectId, subId string, callback func(context.Context, *pubsub.Message)) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {
@@ -33,12 +35,12 @@ func initOrdersConsumer() error {
 	}
 	defer client.Close()
 
-	sub := client.Subscription(subscriptionId)
+	sub := client.Subscription(subId)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	err = sub.Receive(ctx, ordersCallback)
+	err = sub.Receive(ctx, callback)
 	if err != nil {
 		return fmt.Errorf("sub.Receive: %v", err)
 	}
@@ -46,11 +48,21 @@ func initOrdersConsumer() error {
 	return nil
 }
 
+func initPriceConsumer() error {
+	brokersPubSubConfig := config.AppConfig.PubSub.Broker
+	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalPricesSubId, pricesCallback)
+	return nil
+}
+
+func initOrderStatusConsumer() error {
+	brokersPubSubConfig := config.AppConfig.PubSub.Broker
+	initConsumer(brokersPubSubConfig.ProjectId, brokersPubSubConfig.Consumer.BrokerInternalCoreOrdersStatusSubId, orderStatusCallback)
+	return nil
+}
+
 func InitConsumers(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	err := initOrdersConsumer()
-	if err != nil {
-		return err
-	}
+	initOrderStatusConsumer()
+	initPriceConsumer()
 	return nil
 }

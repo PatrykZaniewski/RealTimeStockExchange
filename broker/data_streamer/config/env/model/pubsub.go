@@ -13,6 +13,8 @@ type PubSubBrokerConfig struct {
 }
 
 type PubSubBrokerConsumerConfig struct {
-	BrokerInternalPricesTopicId string `mapstructure:"brokerInternalPricesTopicId"`
-	BrokerInternalPricesSubId   string `mapstructure:"brokerInternalPricesSubId"`
+	BrokerInternalPricesTopicId           string `mapstructure:"brokerInternalPricesTopicId"`
+	BrokerInternalPricesSubId             string `mapstructure:"brokerInternalPricesSubId"`
+	BrokerInternalCoreOrdersStatusTopicId string `mapstructure:"brokerInternalCoreOrdersStatusTopicId"`
+	BrokerInternalCoreOrdersStatusSubId   string `mapstructure:"brokerInternalCoreOrdersStatusSubId"`
 }

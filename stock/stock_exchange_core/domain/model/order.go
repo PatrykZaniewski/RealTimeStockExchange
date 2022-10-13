@@ -1,12 +1,12 @@
 package model
 
 type StockOrder struct {
-	AssetName    string
-	Quantity     int
-	OrderType    string
-	OrderSubtype string
-	OrderPrice   float32
-	ClientId     string
-	BrokerId     string
-	Id           string
+	AssetName    string  `json:"assetName"`
+	Quantity     int     `json:"quantity"`
+	OrderType    string  `json:"orderType"`
+	OrderSubtype string  `json:"orderSubtype"`
+	OrderPrice   float32 `json:"orderPrice"`
+	ClientId     string  `json:"clientId"`
+	BrokerId     string  `json:"brokerId"`
+	Id           string  `json:"id"`
 }

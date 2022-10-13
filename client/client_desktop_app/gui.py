@@ -6,6 +6,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QMainWindow, QLineEdit, QApplication
 
 from client.client_desktop_app.business_logic import process_order, OrderType
+from client.client_desktop_app.model.price import Price
 
 
 def get_main_window():
@@ -85,18 +86,18 @@ class MainWindow(QMainWindow):
 
         return h_layout
 
-    def update_price(self, asset_data):
+    def update_price(self, price: Price):
         layout: Optional[QHBoxLayout] = None
         for i in range(self.v_layout.count()):
-            if self.v_layout.itemAt(i).layout().objectName() == asset_data.get("AssetName"):
+            if self.v_layout.itemAt(i).layout().objectName() == price.asset_name:
                 layout = self.v_layout.itemAt(i).layout()
                 break
 
         for i in range(layout.count()):
             if layout.itemAt(i).widget().objectName() == "buy_price":
-                layout.itemAt(i).widget().setText(str(asset_data.get("BuyPrice")))
+                layout.itemAt(i).widget().setText(str(price.buy_price))
             if layout.itemAt(i).widget().objectName() == "sell_price":
-                layout.itemAt(i).widget().setText(str(asset_data.get("SellPrice")))
+                layout.itemAt(i).widget().setText(str(price.sell_price))
 
     def _process_order(self, asset_name: str, amount: QLineEdit, price: QLabel, order_type: OrderType):
         process_order(asset_name, int(amount.text()), float(price.text()), order_type)

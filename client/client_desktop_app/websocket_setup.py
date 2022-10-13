@@ -1,12 +1,14 @@
 import datetime
 import json
 import os
+import time
 
 from PyQt5 import QtCore, QtWebSockets
 from PyQt5.QtCore import QUrl
 
 from client.client_desktop_app.gui import get_main_window, MainWindow
 from client.client_desktop_app.model.order_status import OrderStatus
+from client.client_desktop_app.model.price import Price
 
 
 class QClient(QtCore.QObject):
@@ -25,13 +27,15 @@ class QClient(QtCore.QObject):
 
     def on_message(self, message):
         message = json.loads(message)
-        if message['Type'] == "PRICE":
-            print(message)
+        if message['type'] == "PRICE":
+            # print(message)
+            price = Price.from_dict(message)
             main_window: MainWindow = get_main_window()
-            main_window.update_price(message)
-        elif message['Type'] == 'ORDER_STATUS':
+            main_window.update_price(price)
+        elif message['type'] == 'ORDER_STATUS':
+            order_status = OrderStatus.from_dict(message)
             # status = OrderStatus(**message)
-            print(f"{message['Id']},RECEIVED,{datetime.datetime.timestamp(datetime.datetime.now())}")
+            print(f"{order_status.id},CLIENT,RECEIVED,{time.time()}")
         self.client.ping(b"ping")
 
     def close(self):

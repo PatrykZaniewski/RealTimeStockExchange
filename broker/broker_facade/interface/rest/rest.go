@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"sync"
+	"time"
 )
 
 func HandleRequests(wg *sync.WaitGroup) {
@@ -24,10 +26,12 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func order(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: InternalOrder")
+	//fmt.Println("Endpoint Hit: InternalOrder")
 	var client = r.Header.Get("identifier")
 	var facadeOrder model.FacadeOrder
 	json.NewDecoder(r.Body).Decode(&facadeOrder)
+	fmt.Printf("%s,FACADE,RECEIVED,%s", facadeOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	fmt.Println()
 	var internalOrder = model.InternalOrder{
 		AssetName:    facadeOrder.AssetName,
 		Quantity:     facadeOrder.Quantity,

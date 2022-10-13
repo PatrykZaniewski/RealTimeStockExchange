@@ -1,10 +1,10 @@
 package model
 
 type FacadeOrder struct {
-	AssetName    string
-	Quantity     int
-	OrderType    string
-	OrderSubtype string
-	OrderPrice   float32
-	Id           string
+	AssetName    string  `json:"assetName"`
+	Quantity     int     `json:"quantity"`
+	OrderType    string  `json:"orderType"`
+	OrderSubtype string  `json:"orderSubtype"`
+	OrderPrice   float32 `json:"orderPrice"`
+	Id           string  `json:"id"`
 }

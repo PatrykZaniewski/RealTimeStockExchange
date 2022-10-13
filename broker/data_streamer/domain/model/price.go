@@ -1,12 +1,12 @@
 package model
 
 type Price struct {
-	AssetName string
-	BuyPrice  float32
-	SellPrice float32
+	AssetName string  `json:"assetName"`
+	BuyPrice  float32 `json:"buyPrice"`
+	SellPrice float32 `json:"sellPrice"`
 }
 
 type PriceMessage struct {
-	Type string
+	Type string `json:"type"`
 	Price
 }

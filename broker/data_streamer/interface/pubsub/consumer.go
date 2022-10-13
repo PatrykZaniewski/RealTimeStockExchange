@@ -8,7 +8,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
 	"sync"
+	"time"
 )
 
 func pricesCallback(_ context.Context, msg *pubsub.Message) {
@@ -23,6 +26,7 @@ func orderStatusCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var orderStatus model.OrderStatus
 	json.Unmarshal(msg.Data, &orderStatus)
+	log.Printf("%s,BROKER_DATA_STREAMER,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	websocket.PublishOrderStatusMessage(&orderStatus)
 	msg.Ack()
 }

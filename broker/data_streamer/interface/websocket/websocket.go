@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 var upgrade = websocket.Upgrader{}
@@ -35,6 +37,7 @@ func PublishOrderStatusMessage(data *model.OrderStatus) {
 	if connection != nil {
 		res, _ := json.Marshal(model.OrderStatusMessage{"ORDER_STATUS", *data})
 		connection.WriteMessage(websocket.TextMessage, res)
+		log.Printf("%s,BROKER_DATA_STREAMER,STATUS_SEND,%s", data.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}
 }
 

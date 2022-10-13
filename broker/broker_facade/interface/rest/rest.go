@@ -30,7 +30,7 @@ func order(w http.ResponseWriter, r *http.Request) {
 	var client = r.Header.Get("identifier")
 	var facadeOrder model.FacadeOrder
 	json.NewDecoder(r.Body).Decode(&facadeOrder)
-	fmt.Printf("%s,FACADE,RECEIVED,%s", facadeOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	log.Printf("%s,BROKER_FACADE,ORDER_RECEIVED,%s", facadeOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	fmt.Println()
 	var internalOrder = model.InternalOrder{
 		AssetName:    facadeOrder.AssetName,

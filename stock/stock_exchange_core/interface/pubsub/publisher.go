@@ -5,8 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	config "stock/stock_exchange_core/config/env"
 	"stock/stock_exchange_core/domain/model"
+	"strconv"
+	"time"
 )
 
 func PublishPrices(newPrice *model.Price) error {
@@ -27,6 +30,7 @@ func PublishOrderStatus(orderStatus *model.OrderStatus) error {
 	for _, pubSubBrokerConfig := range pubSubBrokerConfigs {
 		if pubSubBrokerConfig.Id == orderStatus.BrokerId {
 			err := PublishMessage(pubSubBrokerConfig.ProjectId, pubSubBrokerConfig.Publisher.OrdersStatusTopicId, orderStatus)
+			log.Printf("%s,STOCK_CORE,STATUS_SEND,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 			if err != nil {
 				return err
 			}

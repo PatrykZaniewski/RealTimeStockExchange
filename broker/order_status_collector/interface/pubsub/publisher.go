@@ -7,6 +7,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
 )
 
 func PublishOrderStatus(newStatus *model.OrderStatus) error {
@@ -15,6 +18,7 @@ func PublishOrderStatus(newStatus *model.OrderStatus) error {
 	topicId := pubSubConfig.Broker.Publisher.BrokerInternalOrdersStatusTopicId
 
 	err := PublishMessage(projectId, topicId, newStatus)
+	log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_RECEIVED,%s", newStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	if err != nil {
 		return err
 	}

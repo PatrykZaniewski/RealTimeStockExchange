@@ -7,7 +7,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
 	"sync"
+	"time"
 )
 
 func InitConsumers(wg *sync.WaitGroup) error {
@@ -47,6 +50,7 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 
 	var internalOrder model.InternalOrder
 	json.Unmarshal(msg.Data, &internalOrder)
+	log.Printf("%s,BROKER_ORDER_EXECUTOR,ORDER_RECEIVED,%s", internalOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	var stockOrder = model.StockOrder{
 		AssetName:    internalOrder.AssetName,
 		Quantity:     internalOrder.Quantity,

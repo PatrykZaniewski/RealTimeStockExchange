@@ -7,6 +7,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"reflect"
+	"strconv"
+	"time"
 )
 
 func PublishOrder(data *model.InternalOrder) error {
@@ -40,5 +44,8 @@ func publishMessage(projectId, topicID string, msg interface{}) error {
 		return fmt.Errorf("pubsub: result.Get: %v", err)
 	}
 	fmt.Printf("Published a message; msg ID: %v\n", id)
+	ref := reflect.ValueOf(msg)
+	orderId := reflect.Indirect(ref).FieldByName("Id")
+	log.Printf("%s,BROKER_FACADE,SEND,%s", orderId, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	return nil
 }

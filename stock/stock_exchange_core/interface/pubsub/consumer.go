@@ -5,17 +5,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	config "stock/stock_exchange_core/config/env"
 	"stock/stock_exchange_core/domain/model"
+	"strconv"
 	"sync"
+	"time"
 )
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var stockOrder model.StockOrder
 	json.Unmarshal(msg.Data, &stockOrder)
+	log.Printf("%s,STOCK_CORE,ORDER_RECEIVED,%s", stockOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 
 	var price = model.Price{
 		AssetName: stockOrder.AssetName,

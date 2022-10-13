@@ -7,6 +7,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
 )
 
 func PublishOrder(order *model.InternalOrder) error {
@@ -15,6 +18,8 @@ func PublishOrder(order *model.InternalOrder) error {
 	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
 
 	err := publishMessage(projectId, topicId, order)
+	log.Printf("%s,BROKER_CORE,ORDER_SEND,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+
 	if err != nil {
 		return err
 	}
@@ -27,6 +32,7 @@ func PublishOrderStatus(order *model.OrderStatus) error {
 	topicId := pubSubConfig.Broker.Publisher.BrokerInternalCoreOrdersStatusTopicId
 
 	err := publishMessage(projectId, topicId, order)
+	log.Printf("%s,BROKER_CORE,STATUS_SEND,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	if err != nil {
 		return err
 	}

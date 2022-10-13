@@ -5,9 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	config "stock/order_collector/config/env"
 	"stock/order_collector/domain/model"
+	"strconv"
 	"sync"
+	"time"
 )
 
 func InitConsumers(wg *sync.WaitGroup) error {
@@ -55,6 +58,7 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var order model.StockOrder
 	json.Unmarshal(msg.Data, &order)
 	PublishOrder(&order)
+	log.Printf("%s,STOCK_ORDER_COLLECTOR,ORDER_RECEIVED,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

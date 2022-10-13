@@ -7,6 +7,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
 )
 
 func PublishOrder(order *model.StockOrder) error {
@@ -15,6 +18,7 @@ func PublishOrder(order *model.StockOrder) error {
 	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
 
 	err := publishMessage(projectId, topicId, order)
+	log.Printf("%s,BROKER_ORDER_EXECUTOR,ORDER_SEND,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	if err != nil {
 		return err
 	}

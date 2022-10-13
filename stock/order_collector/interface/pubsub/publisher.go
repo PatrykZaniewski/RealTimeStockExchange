@@ -5,16 +5,20 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	config "stock/order_collector/config/env"
 	"stock/order_collector/domain/model"
+	"strconv"
+	"time"
 )
 
-func PublishOrder(data *model.StockOrder) error {
+func PublishOrder(order *model.StockOrder) error {
 	pubSubConfig := config.AppConfig.PubSub
 	projectId := pubSubConfig.Stock.ProjectId
 	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId
 
-	err := publishMessage(projectId, topicId, data)
+	err := publishMessage(projectId, topicId, order)
+	log.Printf("%s,STOCK_ORDER_COLLECTOR,ORDER_SEND,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	if err != nil {
 		return err
 	}

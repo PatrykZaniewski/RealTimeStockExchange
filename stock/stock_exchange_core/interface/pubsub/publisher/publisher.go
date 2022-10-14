@@ -1,4 +1,4 @@
-package pubsub
+package publisher
 
 import (
 	"cloud.google.com/go/pubsub"

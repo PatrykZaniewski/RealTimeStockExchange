@@ -10,6 +10,9 @@ pubsub:
     projectId: my-second-project-364017
     publisher:
       brokerInternalClientOrdersTopicId: broker.internal.client_orders
+    consumer:
+      clientMockOrdersTopicId: client_mock.orders
+      clientMockOrdersSubId: client_mock.orders.sub
 
 rest:
   stock:

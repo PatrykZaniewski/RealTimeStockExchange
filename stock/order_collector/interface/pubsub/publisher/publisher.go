@@ -1,31 +1,31 @@
-package pubsub
+package publisher
 
 import (
-	config "broker/order_status_collector/config/env"
-	"broker/order_status_collector/domain/model"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	config "stock/order_collector/config/env"
+	"stock/order_collector/domain/model"
 	"strconv"
 	"time"
 )
 
-func PublishOrderStatus(newStatus *model.OrderStatus) error {
+func PublishOrder(order *model.StockOrder) error {
 	pubSubConfig := config.AppConfig.PubSub
-	projectId := pubSubConfig.Broker.ProjectId
-	topicId := pubSubConfig.Broker.Publisher.BrokerInternalOrdersStatusTopicId
+	projectId := pubSubConfig.Stock.ProjectId
+	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId
 
-	err := PublishMessage(projectId, topicId, newStatus)
-	log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_RECEIVED,%s", newStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	err := publishMessage(projectId, topicId, order)
+	log.Printf("%s,STOCK_ORDER_COLLECTOR,ORDER_SEND,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func PublishMessage(projectId, topicID string, msg interface{}) error {
+func publishMessage(projectId, topicID string, msg interface{}) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
 	if err != nil {

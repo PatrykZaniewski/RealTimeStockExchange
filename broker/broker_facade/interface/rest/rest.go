@@ -3,7 +3,7 @@ package rest
 import (
 	config "broker/broker_facade/config/env"
 	"broker/broker_facade/domain/model"
-	"broker/broker_facade/interface/pubsub"
+	"broker/broker_facade/interface/pubsub/publisher"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -42,6 +42,7 @@ func order(w http.ResponseWriter, r *http.Request) {
 		Id:           facadeOrder.Id,
 	}
 
-	pubsub.PublishOrder(&internalOrder)
-	fmt.Println(internalOrder)
+	publisher.PublishOrder(&internalOrder)
+	w.WriteHeader(200)
+	return
 }

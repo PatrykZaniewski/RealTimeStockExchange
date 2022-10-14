@@ -1,24 +1,21 @@
-package pubsub
+package consumer
 
 import (
 	config "broker/data_streamer/config/env"
 	"broker/data_streamer/domain/model"
-	"broker/data_streamer/interface/websocket"
+	"broker/data_streamer/domain/service"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
 	"sync"
-	"time"
 )
 
 func pricesCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var price model.Price
 	json.Unmarshal(msg.Data, &price)
-	websocket.PublishPriceMessage(&price)
+	service.PublishPrice(&price)
 	msg.Ack()
 }
 
@@ -26,8 +23,7 @@ func orderStatusCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var orderStatus model.OrderStatus
 	json.Unmarshal(msg.Data, &orderStatus)
-	log.Printf("%s,BROKER_DATA_STREAMER,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
-	websocket.PublishOrderStatusMessage(&orderStatus)
+	service.PublishStatusOrder(&orderStatus)
 	msg.Ack()
 }
 

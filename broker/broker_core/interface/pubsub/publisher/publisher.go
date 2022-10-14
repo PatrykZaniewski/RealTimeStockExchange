@@ -1,4 +1,4 @@
-package pubsub
+package publisher
 
 import (
 	config "broker/broker_core/config/env"

@@ -1,46 +1,22 @@
-package pubsub
+package consumer
 
 import (
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"math"
-	"math/rand"
 	config "stock/stock_exchange_core/config/env"
 	"stock/stock_exchange_core/domain/model"
-	"strconv"
+	"stock/stock_exchange_core/domain/service"
 	"sync"
-	"time"
 )
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var stockOrder model.StockOrder
 	json.Unmarshal(msg.Data, &stockOrder)
-	log.Printf("%s,STOCK_CORE,ORDER_RECEIVED,%s", stockOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 
-	var price = model.Price{
-		AssetName: stockOrder.AssetName,
-		BuyPrice:  float32(math.Round((rand.Float64()*100+600)*100) / 100),
-		SellPrice: float32(math.Round((rand.Float64()*100+600)*100) / 100),
-	}
-	PublishPrices(&price)
-
-	var orderStatus = model.OrderStatus{
-		AssetName:    stockOrder.AssetName,
-		Quantity:     stockOrder.Quantity,
-		OrderType:    stockOrder.OrderType,
-		OrderSubtype: stockOrder.OrderSubtype,
-		OrderPrice:   stockOrder.OrderPrice,
-		ClientId:     stockOrder.ClientId,
-		BrokerId:     stockOrder.BrokerId,
-		Id:           stockOrder.Id,
-		Status:       model.FULFILLED,
-	}
-	PublishOrderStatus(&orderStatus)
-
+	service.ProcessOrder(&stockOrder)
 	msg.Ack()
 }
 

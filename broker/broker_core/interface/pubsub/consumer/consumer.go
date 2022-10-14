@@ -1,16 +1,14 @@
-package pubsub
+package consumer
 
 import (
 	config "broker/broker_core/config/env"
 	"broker/broker_core/domain/model"
+	"broker/broker_core/domain/service"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
 	"sync"
-	"time"
 )
 
 func InitConsumers(wg *sync.WaitGroup) error {
@@ -50,8 +48,7 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var order model.InternalOrder
 	json.Unmarshal(msg.Data, &order)
-	log.Printf("%s,BROKER_CORE,ORDER_RECEIVED,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
-	PublishOrder(&order)
+	service.PublishOrder(&order)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }
@@ -59,8 +56,7 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 func ordersStatusCallback(_ context.Context, msg *pubsub.Message) {
 	var orderStatus model.OrderStatus
 	json.Unmarshal(msg.Data, &orderStatus)
-	log.Printf("%s,BROKER_CORE,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
-	PublishOrderStatus(&orderStatus)
+	service.PublishStatusOrder(&orderStatus)
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

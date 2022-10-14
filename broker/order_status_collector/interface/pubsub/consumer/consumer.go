@@ -1,24 +1,21 @@
-package pubsub
+package consumer
 
 import (
 	config "broker/order_status_collector/config/env"
 	"broker/order_status_collector/domain/model"
+	"broker/order_status_collector/domain/service"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
 	"sync"
-	"time"
 )
 
 func ordersStatusCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var orderStatus model.OrderStatus
-	log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	json.Unmarshal(msg.Data, &orderStatus)
-	PublishOrderStatus(&orderStatus)
+	service.PublishOrderStatus(&orderStatus)
 	msg.Ack()
 }
 

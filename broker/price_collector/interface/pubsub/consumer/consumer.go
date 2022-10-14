@@ -1,8 +1,9 @@
-package pubsub
+package consumer
 
 import (
 	config "broker/price_collector/config/env"
 	"broker/price_collector/domain/model"
+	"broker/price_collector/domain/service"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
@@ -14,7 +15,7 @@ func pricesCallback(_ context.Context, msg *pubsub.Message) {
 	fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var price model.Price
 	json.Unmarshal(msg.Data, &price)
-	PublishPrices(&price)
+	service.PublishPrices(&price)
 	msg.Ack()
 }
 

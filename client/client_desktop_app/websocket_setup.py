@@ -1,5 +1,5 @@
-import datetime
 import json
+import logging
 import os
 import time
 
@@ -28,14 +28,15 @@ class QClient(QtCore.QObject):
     def on_message(self, message):
         message = json.loads(message)
         if message['type'] == "PRICE":
-            # print(message)
+            print(message)
             price = Price.from_dict(message)
             main_window: MainWindow = get_main_window()
             main_window.update_price(price)
         elif message['type'] == 'ORDER_STATUS':
             order_status = OrderStatus.from_dict(message)
             # status = OrderStatus(**message)
-            print(f"{order_status.id},CLIENT,ORDER_RECEIVED,{time.time()}")
+            logging.info(f'{time.strftime("%m/%d/%Y %H:%M:%S", time.localtime())} {order_status.id},CLIENT,STATUS_RECEIVED,{int(time.time() * 1000000)}')
+            # print(f"{order_status.id},CLIENT,STATUS_RECEIVED,{int(time.time() * 1000000)}")
         self.client.ping(b"ping")
 
     def close(self):

@@ -5,6 +5,7 @@ import sys
 import time
 import uuid
 
+import aiohttp as aiohttp
 import requests as requests
 import websockets as websockets
 from dotenv import load_dotenv
@@ -28,17 +29,23 @@ async def hello():
 
 
 async def generate_orders():
-    for _ in range(10):
-        id = str(uuid.uuid4())
-        order = {"assetName": "ASSECO", "quantity": 1, "orderType": "BUY", "orderSubtype": "MARKET_ORDER",
-                 "orderPrice": 100.0, "id": id}
-        logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
-        requests.post(url=f"http://localhost:5012/order", data=json.dumps(order), headers={"identifier": "broker_client_1"})
-        await asyncio.sleep(0.1)
+    # for _ in range(10):
+    id = str(uuid.uuid4())
+    order = {"assetName": "ASSECO", "quantity": 1, "orderType": "BUY", "orderSubtype": "MARKET_ORDER",
+             "orderPrice": 100.0, "id": id}
+    tmp = json.dumps(order)
+    # logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url='http://localhost:5012/order', headers={"identifier": "broker_client_1"}, data=tmp) as response:
+            if response.status == 200:
+                logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
+        # requests.post(url=f"http://localhost:5012/order", data=json.dumps(order), headers={"identifier": "broker_client_1"})
+        # await asyncio.sleep(0.1)
 
 
 async def main():
-    asyncio.get_event_loop().create_task(generate_orders())
+    for _ in range(10):
+        asyncio.get_event_loop().create_task(generate_orders())
     await hello()
 
 
@@ -49,7 +56,7 @@ if __name__ == "__main__":
     # window = MainWindow()
     # load_dotenv(dotenv_path="./settings.env")
     # qclient = QClient(app)
-    # ret = app.exec_()
+    # asyncio.run(app.exec_())
     # sys.exit(ret)
 
     asyncio.get_event_loop().run_until_complete(main())

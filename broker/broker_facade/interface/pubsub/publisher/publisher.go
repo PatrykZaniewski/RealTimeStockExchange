@@ -35,15 +35,15 @@ func publishMessage(projectId, topicID string, msg interface{}) error {
 	jsonMsg, _ := json.Marshal(msg)
 
 	t := client.Topic(topicID)
-	result := t.Publish(ctx, &pubsub.Message{
+	t.Publish(ctx, &pubsub.Message{
 		Data: jsonMsg,
 	})
 
-	id, err := result.Get(ctx)
+	//id, err := result.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("pubsub: result.Get: %v", err)
 	}
-	fmt.Printf("Published a message; msg ID: %v\n", id)
+	//fmt.Printf("Published a message; msg ID: %v\n", id)
 	ref := reflect.ValueOf(msg)
 	orderId := reflect.Indirect(ref).FieldByName("Id")
 	log.Printf("%s,BROKER_FACADE,SEND,%s", orderId, strconv.FormatInt(time.Now().UnixMicro(), 10))

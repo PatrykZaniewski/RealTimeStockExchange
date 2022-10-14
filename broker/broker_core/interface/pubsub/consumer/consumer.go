@@ -49,7 +49,7 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var order model.InternalOrder
 	json.Unmarshal(msg.Data, &order)
 	service.PublishOrder(&order)
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }
 
@@ -57,13 +57,13 @@ func ordersStatusCallback(_ context.Context, msg *pubsub.Message) {
 	var orderStatus model.OrderStatus
 	json.Unmarshal(msg.Data, &orderStatus)
 	service.PublishStatusOrder(&orderStatus)
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }
 
 func pricesCallback(_ context.Context, msg *pubsub.Message) {
 	var price model.Price
 	json.Unmarshal(msg.Data, &price)
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

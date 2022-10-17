@@ -56,7 +56,7 @@ if __name__ == "__main__":
     # window = MainWindow()
     # load_dotenv(dotenv_path="./settings.env")
     # qclient = QClient(app)
-    # asyncio.run(app.exec_())
+    # app.exec_()
     # sys.exit(ret)
-
+    #
     asyncio.get_event_loop().run_until_complete(main())

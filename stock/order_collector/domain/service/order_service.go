@@ -9,6 +9,8 @@ import (
 )
 
 func PublishOrder(order *model.StockOrder) {
-	log.Printf("%s,STOCK_ORDER_COLLECTOR,ORDER_RECEIVED,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	if order.BrokerId != "mock_broker" && order.ClientId != "mock_client" {
+		log.Printf("%s,STOCK_ORDER_COLLECTOR,ORDER_RECEIVED,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	publisher.PublishOrder(order)
 }

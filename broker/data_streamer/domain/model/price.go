@@ -2,8 +2,8 @@ package model
 
 type Price struct {
 	AssetName string  `json:"assetName"`
-	BuyPrice  float32 `json:"buyPrice"`
-	SellPrice float32 `json:"sellPrice"`
+	BuyPrice  float64 `json:"buyPrice"`
+	SellPrice float64 `json:"sellPrice"`
 }
 
 type PriceMessage struct {

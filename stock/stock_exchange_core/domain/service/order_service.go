@@ -3,8 +3,10 @@ package service
 import (
 	"cloud.google.com/go/firestore"
 	"context"
+	"encoding/json"
 	"log"
 	"reflect"
+	"sort"
 	config "stock/stock_exchange_core/config/env"
 	"stock/stock_exchange_core/domain/model"
 	"stock/stock_exchange_core/interface/pubsub/publisher"
@@ -12,13 +14,14 @@ import (
 	"time"
 )
 
-func ProcessMarketOrder() *model.OrderStatus {
+func ProcessLimitOrder() *model.OrderStatus {
+	//stockOrder *model.StockOrder
 	var stockOrder = &model.StockOrder{
 		AssetName:    "ASSECO",
 		Quantity:     1,
-		OrderType:    "BUY",
+		OrderType:    "SELL",
 		OrderSubtype: "MARKET",
-		OrderPrice:   160.00,
+		OrderPrice:   210.00,
 		ClientId:     "broker_client_1",
 		BrokerId:     "common_broker_1",
 		Id:           "zxc",
@@ -28,7 +31,7 @@ func ProcessMarketOrder() *model.OrderStatus {
 	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
-	orderBookRef := client.Collection("orderBook").Doc("ASSECO")
+	orderBookRef := client.Collection("orderBook").Doc(stockOrder.AssetName)
 	newPrices := (*model.Price)(nil)
 
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
@@ -108,31 +111,126 @@ func ProcessMarketOrder() *model.OrderStatus {
 	return nil
 }
 
-func processLimitOrder(stockOrder *model.StockOrder) *model.OrderStatus {
+func ProcessMarketOrder() *model.OrderStatus {
+	//stockOrder *model.StockOrder
+
+	var stockOrder = &model.StockOrder{
+		AssetName:    "ASSECO",
+		Quantity:     1,
+		OrderType:    "SELL",
+		OrderSubtype: "MARKET",
+		OrderPrice:   160.00,
+		ClientId:     "broker_client_1",
+		BrokerId:     "common_broker_1",
+		Id:           "zxc",
+	}
 	firestoreStockConfig := config.AppConfig.Firestore.StockConfig
 	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
-	orderBookRef := client.Collection("orderBook").Doc("abc")
+	orderBookRef := client.Collection("orderBook").Doc(stockOrder.AssetName)
+	newPrices := (*model.Price)(nil)
+
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		doc, err := tx.Get(orderBookRef) // tx.Get, NOT ref.Get!
+
+		doc, err := tx.Get(orderBookRef)
 		if err != nil {
 			return err
 		}
-		pop, err := doc.DataAt("population")
+		var ordersType string
+		if stockOrder.OrderType == "BUY" {
+			ordersType = "sellOrders"
+		} else {
+			ordersType = "buyOrders"
+		}
+
+		var priceType string
+		if stockOrder.OrderType == "BUY" {
+			priceType = "buyPrice"
+		} else {
+			priceType = "sellPrice"
+		}
+
+		var orders []*model.OrderBookOrder
+		ordersDb, _ := doc.DataAt(ordersType)
+		ordersRaw, _ := json.Marshal(ordersDb)
+		json.Unmarshal(ordersRaw, &orders)
+
 		if err != nil {
 			return err
 		}
-		res := tx.Set(orderBookRef, map[string]interface{}{
-			"population": pop.(int64) + 1,
+
+		sort.Slice(orders, func(i, j int) bool {
+			if stockOrder.OrderType == "BUY" {
+				if orders[i].Price == orders[j].Price {
+					return orders[i].RequestTime.Before(orders[j].RequestTime)
+				} else {
+					return orders[i].Price < orders[j].Price
+				}
+			} else {
+				if orders[i].Price == orders[j].Price {
+					return orders[i].RequestTime.Before(orders[j].RequestTime)
+				} else {
+					return orders[i].Price > orders[j].Price
+				}
+			}
+
+		})
+
+		//limitOrderToBeExecuted := orders[0]
+
+		_ = tx.Set(orderBookRef, map[string]interface{}{
+			ordersType: orders[1:],
+			priceType:  orders[1].Price,
 		}, firestore.MergeAll)
-		return res
+
+		//var currentBuyPriceTmp interface{}
+		//var currentSellPriceTmp interface{}
+		//
+		//var currentBuyPrice float64
+		//var currentSellPrice float64
+		//
+		//currentBuyPriceTmp, _ = doc.DataAt("buyPrice")
+		//currentSellPriceTmp, _ = doc.DataAt("sellPrice")
+		//if reflect.TypeOf(currentBuyPriceTmp).Kind() == reflect.Int64 {
+		//	currentBuyPrice = float64(currentBuyPriceTmp.(int64))
+		//}
+		//if reflect.TypeOf(currentSellPriceTmp).Kind() == reflect.Int64 {
+		//	currentSellPrice = float64(currentSellPriceTmp.(int64))
+		//}
+		//
+		//if stockOrder.OrderType == "BUY" && stockOrder.OrderPrice > currentSellPrice {
+		//	_ = tx.Set(orderBookRef, map[string]interface{}{
+		//		"sellPrice": stockOrder.OrderPrice,
+		//	}, firestore.MergeAll)
+		//	newPrices = &model.Price{
+		//		AssetName: stockOrder.AssetName,
+		//		SellPrice: stockOrder.OrderPrice,
+		//		BuyPrice:  currentBuyPrice,
+		//	}
+		//}
+		//
+		//if stockOrder.OrderType == "SELL" && stockOrder.OrderPrice < currentBuyPrice {
+		//	_ = tx.Set(orderBookRef, map[string]interface{}{
+		//		"buyPrice": stockOrder.OrderPrice,
+		//	}, firestore.MergeAll)
+		//	newPrices = &model.Price{
+		//		AssetName: stockOrder.AssetName,
+		//		SellPrice: currentSellPrice,
+		//		BuyPrice:  stockOrder.OrderPrice,
+		//	}
+		//}
+		return nil
 	})
 	if err != nil {
 		// Handle any errors appropriately in this section.
 		log.Printf("An error has occurred: %s", err)
 	}
 	defer client.Close()
+
+	if newPrices != nil {
+		publisher.PublishPrices(newPrices)
+	}
 	return nil
 }
 

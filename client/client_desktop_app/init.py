@@ -17,9 +17,9 @@ from client.client_desktop_app.websocket_setup import QClient
 
 async def hello():
     async with websockets.connect("ws://localhost:5014/ws",
-                                  extra_headers={"identifier": "broker_client_1"}) as websocket:
+                                  extra_headers={"identifier": "broker_client"}) as websocket:
         while True:
-            await websocket.send("broker_client_1")
+            await websocket.send("broker_client")
             message = await websocket.recv()
             message = json.loads(message)
             if message['type'] == 'ORDER_STATUS':
@@ -36,10 +36,10 @@ async def generate_orders():
     tmp = json.dumps(order)
     # logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
     async with aiohttp.ClientSession() as session:
-        async with session.post(url='http://localhost:5012/order', headers={"identifier": "broker_client_1"}, data=tmp) as response:
+        async with session.post(url='http://localhost:5012/order', headers={"identifier": "broker_client"}, data=tmp) as response:
             if response.status == 200:
                 logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
-        # requests.post(url=f"http://localhost:5012/order", data=json.dumps(order), headers={"identifier": "broker_client_1"})
+        # requests.post(url=f"http://localhost:5012/order", data=json.dumps(order), headers={"identifier": "broker_client"})
         # await asyncio.sleep(0.1)
 
 
@@ -51,12 +51,12 @@ async def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
-    # app = QApplication([])
-    # app.setQuitOnLastWindowClosed(True)
-    # window = MainWindow()
-    # load_dotenv(dotenv_path="./settings.env")
-    # qclient = QClient(app)
-    # app.exec_()
+    app = QApplication([])
+    app.setQuitOnLastWindowClosed(True)
+    window = MainWindow()
+    load_dotenv(dotenv_path="./settings.env")
+    qclient = QClient(app)
+    app.exec_()
     # sys.exit(ret)
-    #
-    asyncio.get_event_loop().run_until_complete(main())
+
+    # asyncio.get_event_loop().run_until_complete(main())

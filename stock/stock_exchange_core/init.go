@@ -10,7 +10,8 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	config.ConfigSetup()
-	service.ProcessMarketOrder()
+	service.ProcessLimitOrder()
+	//service.ProcessMarketOrder()
 	//go consumer.InitConsumers(&wg)
 	//go rest.HandleRequests(&wg)
 	//database.ProceedDbOperation()

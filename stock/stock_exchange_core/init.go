@@ -11,7 +11,7 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	config.ConfigSetup()
-	//for i := 1; i <= 10; i++ {
+	//for i := 1; i <= 40; i++ {
 	//	service.ProcessLimitOrder()
 	//}
 	//service.ProcessMarketOrder()

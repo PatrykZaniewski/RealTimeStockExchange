@@ -47,6 +47,6 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var internalOrder model.InternalOrder
 	json.Unmarshal(msg.Data, &internalOrder)
 	service.PublishOrder(&internalOrder)
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

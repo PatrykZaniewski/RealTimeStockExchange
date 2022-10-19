@@ -49,11 +49,11 @@ func publishMessage(projectId, topicID string, msg interface{}) error {
 	jsonMsg, _ := json.Marshal(msg)
 
 	t := client.Topic(topicID)
-	t.Publish(ctx, &pubsub.Message{
+	result := t.Publish(ctx, &pubsub.Message{
 		Data: jsonMsg,
 	})
 
-	//id, err := result.Get(ctx)
+	_, err = result.Get(ctx)
 	//if err != nil {
 	//	return fmt.Errorf("pubsub: result.Get: %v", err)
 	//}

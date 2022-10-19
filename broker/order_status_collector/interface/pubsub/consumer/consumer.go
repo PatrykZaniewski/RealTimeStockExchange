@@ -12,7 +12,7 @@ import (
 )
 
 func ordersStatusCallback(_ context.Context, msg *pubsub.Message) {
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var orderStatus model.OrderStatus
 	json.Unmarshal(msg.Data, &orderStatus)
 	service.PublishOrderStatus(&orderStatus)

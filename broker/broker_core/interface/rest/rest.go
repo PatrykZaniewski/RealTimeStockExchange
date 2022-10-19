@@ -31,11 +31,12 @@ func HandleRequests(wg *sync.WaitGroup) {
 
 func order(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("Welcome to the order!")
+	//service.PublishStatusOrder()
 	body, _ := ioutil.ReadAll(r.Body)
 	var pr PubSubMessage
 	json.Unmarshal(body, &pr)
 	var order model.InternalOrder
-	service.PublishOrder(&order)
+	service.ProcessOrder(&order)
 
 	w.WriteHeader(200)
 	return

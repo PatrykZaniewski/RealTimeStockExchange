@@ -12,7 +12,7 @@ import (
 )
 
 func pricesCallback(_ context.Context, msg *pubsub.Message) {
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var price model.Price
 	json.Unmarshal(msg.Data, &price)
 	service.PublishPrices(&price)

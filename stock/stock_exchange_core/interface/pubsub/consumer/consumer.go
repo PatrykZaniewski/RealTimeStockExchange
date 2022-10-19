@@ -12,7 +12,7 @@ import (
 )
 
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
-	fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	var stockOrder model.StockOrder
 	json.Unmarshal(msg.Data, &stockOrder)
 

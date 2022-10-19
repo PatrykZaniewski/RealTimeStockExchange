@@ -48,7 +48,7 @@ func initConsumer(projectId, subId string, callback func(context.Context, *pubsu
 func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var order model.InternalOrder
 	json.Unmarshal(msg.Data, &order)
-	service.PublishOrder(&order)
+	service.ProcessOrder(&order)
 	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
 	msg.Ack()
 }

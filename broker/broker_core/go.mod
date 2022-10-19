@@ -3,6 +3,7 @@ module broker/broker_core
 go 1.18
 
 require (
+	cloud.google.com/go/firestore v1.6.1
 	cloud.google.com/go/pubsub v1.25.1
 	github.com/spf13/viper v1.13.0
 )
@@ -34,6 +35,7 @@ require (
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
 	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	google.golang.org/api v0.98.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220822174746-9e6da59bd2fc // indirect

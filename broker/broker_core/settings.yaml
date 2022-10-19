@@ -1,3 +1,7 @@
+firestore:
+  broker:
+    projectId: my-second-project-364017
+
 pubsub:
   listenerType: pull
   publisherType: push

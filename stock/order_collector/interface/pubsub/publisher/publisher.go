@@ -42,10 +42,10 @@ func publishMessage(projectId, topicID string, msg interface{}) error {
 		Data: jsonMsg,
 	})
 
-	id, err := result.Get(ctx)
+	_, err = result.Get(ctx)
 	if err != nil {
 		return fmt.Errorf("pubsub: result.Get: %v", err)
 	}
-	fmt.Printf("Published a message; msg ID: %v\n", id)
+	//fmt.Printf("Published a message; msg ID: %v\n", id)
 	return nil
 }

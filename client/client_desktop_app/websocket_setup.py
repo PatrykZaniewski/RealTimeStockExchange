@@ -35,7 +35,7 @@ class QClient(QtCore.QObject):
         elif message['type'] == 'ORDER_STATUS':
             order_status = OrderStatus.from_dict(message)
             # status = OrderStatus(**message)
-            logging.info(f'{time.strftime("%m/%d/%Y %H:%M:%S", time.localtime())} {order_status.id},CLIENT,STATUS_RECEIVED,{int(time.time() * 1000000)}')
+            logging.info(f'{order_status.id},CLIENT,STATUS_RECEIVED,{int(time.time() * 1000000)}')
             # print(f"{order_status.id},CLIENT,STATUS_RECEIVED,{int(time.time() * 1000000)}")
         self.client.ping(b"ping")
 

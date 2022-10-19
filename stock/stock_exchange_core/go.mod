@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.6.1
 	cloud.google.com/go/pubsub v1.25.1
 	github.com/fatih/structs v1.1.0
+	github.com/google/uuid v1.3.0
 	github.com/spf13/viper v1.13.0
 )
 

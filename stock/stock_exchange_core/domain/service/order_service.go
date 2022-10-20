@@ -4,7 +4,6 @@ import (
 	"cloud.google.com/go/firestore"
 	"context"
 	"encoding/json"
-	"github.com/google/uuid"
 	"log"
 	"reflect"
 	"sort"
@@ -15,19 +14,7 @@ import (
 	"time"
 )
 
-func ProcessLimitOrder() (*model.OrderStatus, *model.Price) {
-	//stockOrder *model.StockOrder
-	var stockOrder = &model.StockOrder{
-		AssetName:    "ASSECO",
-		Quantity:     1,
-		OrderType:    "SELL",
-		OrderSubtype: "MARKET_ORDER",
-		OrderPrice:   205.00,
-		ClientId:     "broker_client",
-		BrokerId:     "common_broker",
-		Id:           uuid.New().String(),
-	}
-
+func ProcessLimitOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *model.Price) {
 	firestoreStockConfig := config.AppConfig.Firestore.StockConfig
 	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
@@ -96,30 +83,25 @@ func ProcessLimitOrder() (*model.OrderStatus, *model.Price) {
 		}
 
 		if stockOrder.OrderType == "BUY" && stockOrder.OrderPrice > currentSellPrice {
-			_ = tx.Set(orderBookRef, map[string]interface{}{
-				"sellPrice": stockOrder.OrderPrice,
-			}, firestore.MergeAll)
-			newPrices = &model.Price{
-				AssetName: stockOrder.AssetName,
-				SellPrice: stockOrder.OrderPrice,
-				BuyPrice:  currentBuyPrice,
-			}
+			currentSellPrice = stockOrder.OrderPrice
 		}
 
 		if stockOrder.OrderType == "SELL" && stockOrder.OrderPrice < currentBuyPrice {
-			_ = tx.Set(orderBookRef, map[string]interface{}{
-				"buyPrice": stockOrder.OrderPrice,
-			}, firestore.MergeAll)
-			newPrices = &model.Price{
-				AssetName: stockOrder.AssetName,
-				SellPrice: currentSellPrice,
-				BuyPrice:  stockOrder.OrderPrice,
-			}
+			currentBuyPrice = stockOrder.OrderPrice
+		}
+
+		_ = tx.Set(orderBookRef, map[string]interface{}{
+			"sellPrice": currentSellPrice,
+			"buyPrice":  currentBuyPrice,
+		}, firestore.MergeAll)
+		newPrices = &model.Price{
+			AssetName: stockOrder.AssetName,
+			SellPrice: currentSellPrice,
+			BuyPrice:  currentBuyPrice,
 		}
 		return nil
 	})
 	if err != nil {
-		// Handle any errors appropriately in this section.
 		log.Printf("An error has occurred: %s", err)
 	}
 	defer client.Close()
@@ -128,25 +110,12 @@ func ProcessLimitOrder() (*model.OrderStatus, *model.Price) {
 }
 
 func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *model.OrderStatus, *model.Price) {
-	//stockOrder *model.StockOrder
-
-	//var stockOrder = &model.StockOrder{
-	//	AssetName:    "ASSECO",
-	//	Quantity:     1,
-	//	OrderType:    "BUY",
-	//	OrderSubtype: "MARKET_ORDER",
-	//	OrderPrice:   160.00,
-	//	ClientId:     "broker_client",
-	//	BrokerId:     "common_broker",
-	//	Id:           "zxc",
-	//}
 	firestoreStockConfig := config.AppConfig.Firestore.StockConfig
 	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	orderBookRef := client.Collection("orderBook").Doc(stockOrder.AssetName)
 	archiveRef := client.Collection("archiveOrders").Doc(stockOrder.AssetName)
-	firstBrokerRef := client.Collection("brokers").Doc(stockOrder.BrokerId)
 	newPrices := (*model.Price)(nil)
 	triggeringOrderStatus := (*model.OrderStatus)(nil)
 	triggeredOrderStatus := (*model.OrderStatus)(nil)
@@ -161,7 +130,11 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 	var limitOrderToBeExecuted model.OrderBookOrder
 
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		orderBookDoc, err := tx.Get(orderBookRef)
+		docs, err := tx.GetAll([]*firestore.DocumentRef{orderBookRef, archiveRef})
+		orderBookDoc := docs[0]
+		archiveOrdersDoc := docs[1]
+		archiveOrders, _ := archiveOrdersDoc.DataAt(ordersType)
+
 		if err != nil {
 			return err
 		}
@@ -270,11 +243,6 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 			Status:         model.FULFILLED,
 		}
 
-		return nil
-	})
-	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		archiveOrdersDoc, _ := tx.Get(archiveRef)
-
 		limitOrderToBeExecutedMap := map[string]interface{}{
 			"brokerId":      limitOrderToBeExecuted.BrokerId,
 			"clientId":      limitOrderToBeExecuted.ClientId,
@@ -295,18 +263,20 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 			"executionTime": time.Now(),
 		}
 
-		archiveOrders, _ := archiveOrdersDoc.DataAt(ordersType)
-
 		_ = tx.Set(archiveRef, map[string]interface{}{
 			ordersType: append(archiveOrders.([]interface{}), []interface{}{limitOrderToBeExecutedMap, upcomingOrderToBeExecutedMap}...),
 		}, firestore.MergeAll)
 
 		return nil
 	})
+
+	firstBrokerRef := client.Collection("brokers").Doc(triggeringOrderStatus.BrokerId)
+	secondBrokerRef := client.Collection("brokers").Doc(triggeredOrderStatus.BrokerId)
+
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		secondBrokerRef := client.Collection("brokers").Doc(limitOrderToBeExecuted.BrokerId)
-		firstBrokerDoc, _ := tx.Get(firstBrokerRef)
-		secondBrokerDoc, _ := tx.Get(secondBrokerRef)
+		docs, _ := tx.GetAll([]*firestore.DocumentRef{firstBrokerRef, secondBrokerRef})
+		firstBrokerDoc := docs[0]
+		secondBrokerDoc := docs[1]
 
 		if stockOrder.BrokerId != limitOrderToBeExecuted.BrokerId {
 

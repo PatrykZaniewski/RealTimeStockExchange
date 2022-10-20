@@ -32,10 +32,9 @@ func ProcessOrder(internalOrder *model.InternalOrder) {
 	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
-	walletRef := client.Collection("orders").Doc(internalOrder.ClientId)
-
+	ordersRef := client.Collection("orders").Doc(internalOrder.ClientId)
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		doc, err := tx.Get(walletRef)
+		doc, err := tx.Get(ordersRef)
 		if err != nil {
 			return err
 		}
@@ -44,7 +43,7 @@ func ProcessOrder(internalOrder *model.InternalOrder) {
 			return err
 		}
 
-		_ = tx.Set(walletRef, map[string]interface{}{
+		_ = tx.Set(ordersRef, map[string]interface{}{
 			"pendingOrders": append(pendingOrders.([]interface{}), map[string]interface{}{
 				"assetName":    internalOrder.AssetName,
 				"clientId":     internalOrder.ClientId,

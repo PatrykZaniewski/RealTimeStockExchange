@@ -28,7 +28,7 @@ class QClient(QtCore.QObject):
     def on_message(self, message):
         message = json.loads(message)
         if message['type'] == "PRICE":
-            print(message)
+            # print(message)
             price = Price.from_dict(message)
             main_window: MainWindow = get_main_window()
             main_window.update_price(price)

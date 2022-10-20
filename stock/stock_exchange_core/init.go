@@ -11,6 +11,16 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 	config.ConfigSetup()
+	//var stockOrder = &model.StockOrder{
+	//	AssetName:    "ASSECO",
+	//	Quantity:     1,
+	//	OrderType:    "SELL",
+	//	OrderSubtype: "MARKET_ORDER",
+	//	OrderPrice:   205.00,
+	//	ClientId:     "broker_client",
+	//	BrokerId:     "mock_broker",
+	//	Id:           uuid.New().String(),
+	//}
 	//for i := 1; i <= 40; i++ {
 	//	service.ProcessLimitOrder()
 	//}

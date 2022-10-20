@@ -40,14 +40,16 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 	walletRef := client.Collection("wallet").Doc(orderStatus.ClientId)
 
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		ordersDoc, err := tx.Get(ordersRef)
-		walletDoc, err := tx.Get(walletRef)
+		docs, err := tx.GetAll([]*firestore.DocumentRef{ordersRef, walletRef})
+		ordersDoc := docs[0]
+		walletDoc := docs[1]
+		pendingOrdersDb, _ := ordersDoc.DataAt("pendingOrders")
 
 		if err != nil {
 			return err
 		}
 		var pendingOrders []*model.PendingOrder
-		pendingOrdersDb, _ := ordersDoc.DataAt("pendingOrders")
+
 		pendingOrdersRaw, _ := json.Marshal(pendingOrdersDb)
 		json.Unmarshal(pendingOrdersRaw, &pendingOrders)
 		if err != nil {
@@ -55,13 +57,13 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 		}
 
 		var newPendingOrders []interface{}
-		var orderToBeExecuted *model.PendingOrder
+		var orderToBeExecuted model.PendingOrder
 
 		for _, s := range pendingOrders {
 			if s.Id != orderStatus.Id {
 				newPendingOrders = append(newPendingOrders, s)
 			} else {
-				orderToBeExecuted = s
+				orderToBeExecuted = *s
 			}
 		}
 
@@ -105,6 +107,5 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 		log.Printf("An error has occurred: %s", err)
 	}
 	defer client.Close()
-
 	publisher.PublishOrderStatus(orderStatus)
 }

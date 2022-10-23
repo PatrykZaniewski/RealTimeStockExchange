@@ -12,18 +12,6 @@ import (
 )
 
 func ProcessOrder(internalOrder *model.InternalOrder) {
-	//internalOrder *model.InternalOrder
-
-	//var internalOrder = &model.InternalOrder{
-	//	AssetName:    "a",
-	//	Quantity:     1,
-	//	OrderType:    "b",
-	//	OrderSubtype: "c",
-	//	OrderPrice:   150.00,
-	//	ClientId:     "a",
-	//	Id:           "de",
-	//}
-
 	if internalOrder.ClientId != "mock_client" {
 		log.Printf("%s,BROKER_CORE,ORDER_RECEIVED,%s", internalOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}

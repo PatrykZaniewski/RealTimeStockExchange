@@ -27,16 +27,16 @@ func PublishPrices(newPrice *model.Price) error {
 func PublishOrderStatus(orderStatus *model.OrderStatus) error {
 	pubSubBrokerConfigs := config.AppConfig.PubSub.Broker
 
-	for _, pubSubBrokerConfig := range pubSubBrokerConfigs {
-		if pubSubBrokerConfig.Id == orderStatus.BrokerId {
-			err := PublishMessage(pubSubBrokerConfig.ProjectId, pubSubBrokerConfig.Publisher.OrdersStatusTopicId, orderStatus)
-			if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
+	if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
+		for _, pubSubBrokerConfig := range pubSubBrokerConfigs {
+			if pubSubBrokerConfig.Id == orderStatus.BrokerId {
+				err := PublishMessage(pubSubBrokerConfig.ProjectId, pubSubBrokerConfig.Publisher.OrdersStatusTopicId, orderStatus)
 				log.Printf("%s,STOCK_CORE,STATUS_SEND,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+				if err != nil {
+					return err
+				}
+				break
 			}
-			if err != nil {
-				return err
-			}
-			break
 		}
 	}
 	return nil

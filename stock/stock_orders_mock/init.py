@@ -1,10 +1,14 @@
 import asyncio
 import json
 import random
+import time
 import uuid
 from typing import Dict
 
+import aiohttp
 from google.cloud import pubsub_v1
+from gcloud.aio.pubsub import PubsubMessage
+from gcloud.aio.pubsub import PublisherClient
 
 ASSETS_BOUNDS = {
     "ASSECO": [100.00, 150.00],
@@ -28,7 +32,7 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
         "orderPrice": round(random.uniform(float(upper_bound), float(upper_bound) + 15.00), 2)
         if order_type == "BUY" else round(
             random.uniform(float(lower_bound) - 15.00, float(lower_bound)), 2),
-        "clientId": "mock_client",
+        "clientId": "mock_client_2",
         "brokerId": "mock_broker",
         "id": str(uuid.uuid4())
     }
@@ -38,6 +42,7 @@ async def process_limit_order():
     while True:
         asyncio.create_task(publish(generate_order("ASSECO", "SELL", "LIMIT_ORDER")))
         asyncio.create_task(publish(generate_order("ASSECO", "BUY", "LIMIT_ORDER")))
+        print("LIMIT_ORDER")
         await asyncio.sleep(1)
 
 
@@ -45,7 +50,8 @@ async def process_market_order():
     while True:
         asyncio.create_task(publish(generate_order("ASSECO", "SELL", "MARKET_ORDER")))
         asyncio.create_task(publish(generate_order("ASSECO", "BUY", "MARKET_ORDER")))
-        await asyncio.sleep(3)
+        print("MARKET_ORDER")
+        await asyncio.sleep(1)
 
 
 async def publish(data: Dict):
@@ -57,8 +63,11 @@ async def publish(data: Dict):
 
 
 async def main():
-    await asyncio.gather(process_market_order(), process_limit_order())
+    await asyncio.gather(
+        process_market_order(),
+        process_limit_order()
+    )
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.get_event_loop().run_until_complete(main())

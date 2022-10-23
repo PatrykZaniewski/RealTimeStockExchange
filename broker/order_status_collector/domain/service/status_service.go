@@ -9,6 +9,8 @@ import (
 )
 
 func PublishOrderStatus(orderStatus *model.OrderStatus) {
-	log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	publisher.PublishOrderStatus(orderStatus)
 }

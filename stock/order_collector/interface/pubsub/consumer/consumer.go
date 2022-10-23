@@ -13,8 +13,8 @@ import (
 
 func InitConsumers(wg *sync.WaitGroup) error {
 	defer wg.Done()
-	initBrokerConsumers()
-	initMockOrdersConsumer()
+	go initBrokerConsumers()
+	go initMockOrdersConsumer()
 	return nil
 }
 
@@ -56,6 +56,6 @@ func ordersCallback(_ context.Context, msg *pubsub.Message) {
 	var order model.StockOrder
 	json.Unmarshal(msg.Data, &order)
 	service.PublishOrder(&order)
-	//fmt.Printf("Got message: %q\n\n", string(msg.Data))
+	//fmt.Printf("Got message: %q\n", string(msg.Data))
 	msg.Ack()
 }

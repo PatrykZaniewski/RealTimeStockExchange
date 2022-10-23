@@ -13,22 +13,7 @@ import (
 )
 
 func PublishStatusOrder(orderStatus *model.OrderStatus) {
-
-	//orderStatus *model.OrderStatus
-	//var orderStatus = &model.OrderStatus{
-	//	AssetName:      "ABC",
-	//	Quantity:       1,
-	//	OrderType:      "a",
-	//	OrderSubtype:   "b",
-	//	OrderPrice:     150.00,
-	//	ExecutionPrice: 153.0,
-	//	ClientId:       "a",
-	//	BrokerId:       "b",
-	//	Id:             "de",
-	//	Status:         model.CREATED,
-	//}
-
-	if orderStatus.ClientId != "mock_client" {
+	if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
 		log.Printf("%s,BROKER_CORE,STATUS_RECEIVED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}
 
@@ -40,21 +25,12 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 	walletRef := client.Collection("wallet").Doc(orderStatus.ClientId)
 
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		docs, err := tx.GetAll([]*firestore.DocumentRef{ordersRef, walletRef})
-		ordersDoc := docs[0]
-		walletDoc := docs[1]
+		ordersDoc, _ := tx.Get(ordersRef)
 		pendingOrdersDb, _ := ordersDoc.DataAt("pendingOrders")
 
-		if err != nil {
-			return err
-		}
 		var pendingOrders []*model.PendingOrder
-
 		pendingOrdersRaw, _ := json.Marshal(pendingOrdersDb)
 		json.Unmarshal(pendingOrdersRaw, &pendingOrders)
-		if err != nil {
-			return err
-		}
 
 		var newPendingOrders []interface{}
 		var orderToBeExecuted model.PendingOrder
@@ -82,26 +58,29 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 				"requestTime":    orderToBeExecuted.RequestTime,
 				"executionTime":  time.Now(),
 			}),
-		}, firestore.MergeAll)
-
-		_ = tx.Set(ordersRef, map[string]interface{}{
 			"pendingOrders": newPendingOrders,
 		}, firestore.MergeAll)
+		return nil
+	})
+
+	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+		walletDoc, _ := tx.Get(walletRef)
 
 		clientAssetCount, _ := walletDoc.DataAt(orderStatus.AssetName)
 
 		if orderStatus.OrderType == "BUY" {
 			_ = tx.Set(walletRef, map[string]interface{}{
 				orderStatus.AssetName: clientAssetCount.(int64) + 1,
-			})
+			}, firestore.MergeAll)
 		} else {
 			_ = tx.Set(walletRef, map[string]interface{}{
 				orderStatus.AssetName: clientAssetCount.(int64) - 1,
-			})
+			}, firestore.MergeAll)
 		}
 
 		return nil
 	})
+
 	if err != nil {
 		// Handle any errors appropriately in this section.
 		log.Printf("An error has occurred: %s", err)

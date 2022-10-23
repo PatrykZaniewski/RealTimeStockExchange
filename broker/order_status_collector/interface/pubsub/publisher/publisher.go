@@ -18,7 +18,9 @@ func PublishOrderStatus(newStatus *model.OrderStatus) error {
 	topicId := pubSubConfig.Broker.Publisher.BrokerInternalOrdersStatusTopicId
 
 	err := PublishMessage(projectId, topicId, newStatus)
-	log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_SEND,%s", newStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	if newStatus.BrokerId != "mock_broker" && newStatus.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_ORDER_STATUS_COLLECTOR,STATUS_SEND,%s", newStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	if err != nil {
 		return err
 	}

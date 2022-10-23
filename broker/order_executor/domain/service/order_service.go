@@ -10,7 +10,9 @@ import (
 )
 
 func PublishOrder(internalOrder *model.InternalOrder) {
-	log.Printf("%s,BROKER_ORDER_EXECUTOR,ORDER_RECEIVED,%s", internalOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	if internalOrder.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_ORDER_EXECUTOR,ORDER_RECEIVED,%s", internalOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 
 	appConfig := config.AppConfig
 	var stockOrder = model.StockOrder{

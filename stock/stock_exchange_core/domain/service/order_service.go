@@ -125,6 +125,10 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 
 	var limitOrderToBeExecuted model.OrderBookOrder
 
+	if stockOrder.BrokerId != "mock_broker" && stockOrder.ClientId != "mock_client" {
+		log.Printf("%s,STOCK_CORE,ORDER_PROCESSING,%s", stockOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
+
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		orderBookDoc, _ := tx.Get(orderBookRef)
 
@@ -297,6 +301,10 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 	//
 	//	return nil
 	//})
+
+	if stockOrder.BrokerId != "mock_broker" && stockOrder.ClientId != "mock_client" {
+		log.Printf("%s,STOCK_CORE,ORDER_PROCESSED,%s", stockOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 
 	if err != nil {
 		// Handle any errors appropriately in this section.

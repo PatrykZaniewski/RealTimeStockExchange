@@ -3,12 +3,12 @@ pubsub:
   publisherType: push
   publisherLocal: True
   stock:
-    projectId: citric-campaign-349210
+    projectId: angelic-bond-366421
     consumer:
       corePricesTopicId: core.prices
       corePricesSubId: core.prices.sub
   broker:
-    projectId: my-second-project-364017
+    projectId: broker-366421
     publisher:
       brokerInternalPricesTopicId: broker.internal.prices
 

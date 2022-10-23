@@ -1,13 +1,13 @@
 firestore:
   stock:
-    projectId: citric-campaign-349210
+    projectId: angelic-bond-366421
 
 pubsub:
   listenerType: pull
   publisherType: push
   publisherLocal: True
   stock:
-    projectId: citric-campaign-349210
+    projectId: angelic-bond-366421
     publisher:
       pricesTopicId: core.prices
     consumer:
@@ -15,7 +15,7 @@ pubsub:
       internalOrdersSubId: core.internal.orders.sub
   broker:
     - id: common_broker
-      projectId: my-second-project-364017
+      projectId: broker-366421
       publisher:
         ordersStatusTopicId: broker.orders.status
 

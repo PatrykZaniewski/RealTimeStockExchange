@@ -4,7 +4,7 @@ pubsub:
   publisherType: push
   publisherLocal: True
   broker:
-    projectId: my-second-project-364017
+    projectId: broker-366421
     publisher:
       brokerPendingOrdersTopicId: broker.pending_orders
     consumer:

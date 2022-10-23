@@ -21,6 +21,9 @@ func ProcessOrder(internalOrder *model.InternalOrder) {
 	ctx := context.Background()
 	client, err := firestore.NewClient(ctx, projectId)
 	ordersRef := client.Collection("orders").Doc(internalOrder.ClientId)
+	if internalOrder.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_CORE,ORDER_PROCESSING,%s", internalOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		doc, err := tx.Get(ordersRef)
 		if err != nil {
@@ -46,6 +49,9 @@ func ProcessOrder(internalOrder *model.InternalOrder) {
 
 		return nil
 	})
+	if internalOrder.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_CORE,ORDER_PROCESSED,%s", internalOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	if err != nil {
 		// Handle any errors appropriately in this section.
 		log.Printf("An error has occurred: %s", err)

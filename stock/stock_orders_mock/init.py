@@ -1,14 +1,10 @@
 import asyncio
 import json
 import random
-import time
 import uuid
 from typing import Dict
 
-import aiohttp
 from google.cloud import pubsub_v1
-from gcloud.aio.pubsub import PubsubMessage
-from gcloud.aio.pubsub import PublisherClient
 
 ASSETS_BOUNDS = {
     "ASSECO": [100.00, 150.00],
@@ -16,7 +12,7 @@ ASSETS_BOUNDS = {
     "CDPROJECT": [25.00, 50.00]
 }
 
-PROJECT_ID = "citric-campaign-349210"
+PROJECT_ID = "angelic-bond-366421"
 TOPIC_ID = "broker_mock.orders"
 
 

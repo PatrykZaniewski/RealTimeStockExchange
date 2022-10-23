@@ -4,6 +4,7 @@ import random
 import uuid
 from typing import Dict
 
+import aiohttp
 from google.cloud import pubsub_v1
 
 ASSETS_BOUNDS = {
@@ -12,8 +13,7 @@ ASSETS_BOUNDS = {
     "CDPROJECT": [25.00, 50.00]
 }
 
-PROJECT_ID = "citric-campaign-349210"
-TOPIC_ID = "broker_mock.orders"
+FACADE_URL = "http://localhost:5012/order"
 
 
 def generate_order(asset_name: str, order_type: str, order_subtype: str):
@@ -29,7 +29,6 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
         if order_type == "BUY" else round(
             random.uniform(float(lower_bound) - 15.00, float(lower_bound)), 2),
         "clientId": "mock_client",
-        "brokerId": "mock_broker",
         "id": str(uuid.uuid4())
     }
 
@@ -49,11 +48,8 @@ async def process_market_order():
 
 
 async def publish(data: Dict):
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
-
-    future = publisher.publish(topic_path, json.dumps(data).encode("utf-8"))
-    future.result()
+    async with aiohttp.ClientSession() as session:
+        await session.post(url=FACADE_URL, data=json.dumps(data), headers={"identifier": "mock_client"})
 
 
 async def main():
@@ -61,4 +57,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.get_event_loop().run_until_complete(main())

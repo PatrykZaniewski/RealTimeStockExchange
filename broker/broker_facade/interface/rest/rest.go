@@ -18,6 +18,7 @@ func HandleRequests(wg *sync.WaitGroup) {
 	generalConfig := config.AppConfig.General
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/order", order)
+	log.Printf("Container started at %s", generalConfig.Rest.Port)
 	log.Fatal(http.ListenAndServe(":"+generalConfig.Rest.Port, nil))
 }
 

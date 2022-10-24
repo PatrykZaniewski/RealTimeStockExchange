@@ -60,7 +60,7 @@ async def publish(data: Dict):
 
 async def main():
     await asyncio.gather(
-        process_market_order(),
+        # process_market_order(),
         process_limit_order()
     )
 

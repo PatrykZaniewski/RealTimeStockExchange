@@ -33,5 +33,6 @@ func order(w http.ResponseWriter, r *http.Request) {
 	var pr PubSubMessage
 	json.Unmarshal(body, &pr)
 	var stockOrder model.StockOrder
+	json.Unmarshal(pr.Message.Data, &stockOrder)
 	service.PublishOrder(&stockOrder)
 }

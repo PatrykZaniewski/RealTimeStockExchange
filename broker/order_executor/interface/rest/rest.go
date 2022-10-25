@@ -5,7 +5,6 @@ import (
 	"broker/order_executor/domain/model"
 	"broker/order_executor/domain/service"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -28,10 +27,10 @@ func HandleRequests(wg *sync.WaitGroup) {
 }
 
 func order(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the order!")
 	body, _ := ioutil.ReadAll(r.Body)
 	var pr PubSubMessage
 	json.Unmarshal(body, &pr)
 	var internalOrder model.InternalOrder
+	json.Unmarshal(pr.Message.Data, &internalOrder)
 	service.PublishOrder(&internalOrder)
 }

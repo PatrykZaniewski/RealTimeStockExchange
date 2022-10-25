@@ -33,6 +33,7 @@ func price(w http.ResponseWriter, r *http.Request) {
 	var pr PubSubMessage
 	json.Unmarshal(body, &pr)
 	var orderStatus model.Price
+	json.Unmarshal(pr.Message.Data, &orderStatus)
 	service.PublishPrices(&orderStatus)
 
 	w.WriteHeader(200)

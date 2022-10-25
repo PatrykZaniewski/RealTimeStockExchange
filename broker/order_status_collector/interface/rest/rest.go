@@ -33,6 +33,7 @@ func status(w http.ResponseWriter, r *http.Request) {
 	var pr PubSubMessage
 	json.Unmarshal(body, &pr)
 	var orderStatus model.OrderStatus
+	json.Unmarshal(pr.Message.Data, &orderStatus)
 	service.PublishOrderStatus(&orderStatus)
 
 	w.WriteHeader(200)

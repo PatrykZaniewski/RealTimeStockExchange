@@ -17,4 +17,4 @@ rest:
 
 general:
   rest:
-    port: 5014
+    port: 8080

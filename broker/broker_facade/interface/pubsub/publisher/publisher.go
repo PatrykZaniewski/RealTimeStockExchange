@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"reflect"
 	"strconv"
 	"time"
 )
@@ -19,6 +18,9 @@ func PublishOrder(data *model.InternalOrder) error {
 	topicId := pubSubConfig.Broker.Publisher.BrokerInternalClientOrdersTopicId
 
 	err := publishMessage(projectId, topicId, data)
+	if data.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_FACADE,ORDER_SEND,%s", data.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	if err != nil {
 		return err
 	}
@@ -28,12 +30,12 @@ func PublishOrder(data *model.InternalOrder) error {
 func publishMessage(projectId, topicID string, msg interface{}) error {
 	ctx := context.Background()
 	client, err := pubsub.NewClient(ctx, projectId)
+	defer client.Close()
 	if err != nil {
 		return fmt.Errorf("pubsub: NewClient: %v", err)
 	}
-	defer client.Close()
-	jsonMsg, _ := json.Marshal(msg)
 
+	jsonMsg, _ := json.Marshal(msg)
 	t := client.Topic(topicID)
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: jsonMsg,
@@ -44,8 +46,5 @@ func publishMessage(projectId, topicID string, msg interface{}) error {
 		return fmt.Errorf("pubsub: result.Get: %v", err)
 	}
 	//fmt.Printf("Published a message; msg ID: %v\n", id)
-	ref := reflect.ValueOf(msg)
-	orderId := reflect.Indirect(ref).FieldByName("Id")
-	log.Printf("%s,BROKER_FACADE,ORDER_SEND,%s", orderId, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	return nil
 }

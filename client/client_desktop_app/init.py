@@ -16,7 +16,7 @@ from client.client_desktop_app.websocket_setup import QClient
 
 
 async def hello():
-    async with websockets.connect("ws://localhost:5014/ws",
+    async with websockets.connect("ws://broker-366421.ew.r.appspot.com/ws",
                                   extra_headers={"identifier": "broker_client"}) as websocket:
         while True:
             await websocket.send("broker_client")
@@ -36,7 +36,7 @@ async def generate_orders():
     tmp = json.dumps(order)
     # logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
     async with aiohttp.ClientSession() as session:
-        async with session.post(url='http://localhost:5012/order', headers={"identifier": "broker_client"}, data=tmp) as response:
+        async with session.post(url='https://broker-facade-msdaaqs4fq-lm.a.run.app/order', headers={"identifier": "broker_client"}, data=tmp) as response:
             if response.status == 200:
                 logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
         # requests.post(url=f"http://localhost:5012/order", data=json.dumps(order), headers={"identifier": "broker_client"})
@@ -44,19 +44,19 @@ async def generate_orders():
 
 
 async def main():
-    for _ in range(10):
+    for _ in range(1):
         asyncio.get_event_loop().create_task(generate_orders())
     await hello()
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
-    app = QApplication([])
-    app.setQuitOnLastWindowClosed(True)
-    window = MainWindow()
-    load_dotenv(dotenv_path="./settings.env")
-    qclient = QClient(app)
-    app.exec_()
+    # app = QApplication([])
+    # app.setQuitOnLastWindowClosed(True)
+    # window = MainWindow()
+    # load_dotenv(dotenv_path="./settings.env")
+    # qclient = QClient(app)
+    # app.exec_()
     # sys.exit(ret)
     #
-    # asyncio.get_event_loop().run_until_complete(main())
+    asyncio.get_event_loop().run_until_complete(main())

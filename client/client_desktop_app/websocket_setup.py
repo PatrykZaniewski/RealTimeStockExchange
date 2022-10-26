@@ -18,6 +18,7 @@ class QClient(QtCore.QObject):
         self.client = QtWebSockets.QWebSocket()
         self.client.textMessageReceived.connect(self.on_message)
         self.client.connected.connect(self.on_connected)
+        self.client.ping(str.encode(os.getenv("identifier")))
 
         self.client.open(QUrl(os.getenv("data_streamer_websocket")))
 

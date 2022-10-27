@@ -24,6 +24,10 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 	ordersRef := client.Collection("orders").Doc(orderStatus.ClientId)
 	walletRef := client.Collection("wallet").Doc(orderStatus.ClientId)
 
+	if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_CORE,STATUS_PROCESSING,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
+
 	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
 		ordersDoc, _ := tx.Get(ordersRef)
 		pendingOrdersDb, _ := ordersDoc.DataAt("pendingOrders")
@@ -80,6 +84,10 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 
 		return nil
 	})
+
+	if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_CORE,STATUS_PROCESSED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 
 	if err != nil {
 		// Handle any errors appropriately in this section.

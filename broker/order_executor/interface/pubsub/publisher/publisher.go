@@ -17,6 +17,9 @@ func PublishOrder(order *model.StockOrder) error {
 	projectId := pubSubConfig.Broker.ProjectId
 	topicId := pubSubConfig.Broker.Publisher.BrokerPendingOrdersTopicId
 
+	if order.ClientId != "mock_client" {
+		log.Printf("%s,BROKER_ORDER_EXECUTOR,ORDER_SENDING,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
+	}
 	err := publishMessage(projectId, topicId, order)
 	if order.BrokerId != "mock_broker" && order.ClientId != "mock_client" {
 		log.Printf("%s,BROKER_ORDER_EXECUTOR,ORDER_SEND,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
@@ -37,6 +40,9 @@ func publishMessage(projectId, topicID string, msg interface{}) error {
 	jsonMsg, _ := json.Marshal(msg)
 
 	t := client.Topic(topicID)
+	t.PublishSettings.DelayThreshold = -1 * time.Millisecond
+	t.PublishSettings.CountThreshold = 1
+	t.PublishSettings.ByteThreshold = 1
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: jsonMsg,
 	})

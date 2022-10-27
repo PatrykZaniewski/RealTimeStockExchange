@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 func PublishPrices(newPrice *model.Price) error {
@@ -31,6 +32,9 @@ func PublishMessage(projectId, topicID string, msg interface{}) error {
 	jsonMsg, _ := json.Marshal(msg)
 
 	t := client.Topic(topicID)
+	t.PublishSettings.DelayThreshold = -1 * time.Millisecond
+	t.PublishSettings.CountThreshold = 1
+	t.PublishSettings.ByteThreshold = 1
 	result := t.Publish(ctx, &pubsub.Message{
 		Data: jsonMsg,
 	})

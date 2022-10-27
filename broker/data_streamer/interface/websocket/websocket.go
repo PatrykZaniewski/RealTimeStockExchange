@@ -43,6 +43,7 @@ func Websocket(w http.ResponseWriter, r *http.Request) {
 func PublishOrderStatusMessage(data *model.OrderStatus) {
 	var connection = connections[data.ClientId]
 	if connection != nil {
+		log.Printf("%s,BROKER_DATA_STREAMER,STATUS_SENDING,%s", data.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 		connection.ConnectionMutex.Lock()
 		defer connection.ConnectionMutex.Unlock()
 		res, _ := json.Marshal(model.OrderStatusMessage{"ORDER_STATUS", *data})

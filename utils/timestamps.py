@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Timestamps:
+class ProcessingTimestamps:
     client_order_send: int
     broker_facade_order_received: int
     broker_facade_order_sending: int
@@ -17,6 +17,7 @@ class Timestamps:
     broker_order_executor_order_send: int
     stock_order_collector_order_received: int
     stock_order_collector_order_sending: int
+    stock_order_collector_order_send: int
     stock_core_order_received: int
     stock_core_order_processing: int
     stock_core_order_processed: int
@@ -29,6 +30,7 @@ class Timestamps:
     broker_core_status_processing: int
     broker_core_status_processed: int
     broker_core_status_sending: int
+    broker_core_status_send: int
     broker_data_streamer_status_received: int
     broker_data_streamer_status_sending: int
     broker_data_streamer_status_send: int

@@ -1,37 +1,38 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 
 @dataclass
 class ProcessingTimestamps:
-    client_order_send: int
-    broker_facade_order_received: int
-    broker_facade_order_sending: int
-    broker_facade_order_send: int
-    broker_core_order_received: int
-    broker_core_order_processing: int
-    broker_core_order_processed: int
-    broker_core_order_sending: int
-    broker_core_order_send: int
-    broker_order_executor_order_received: int
-    broker_order_executor_order_sending: int
-    broker_order_executor_order_send: int
-    stock_order_collector_order_received: int
-    stock_order_collector_order_sending: int
-    stock_order_collector_order_send: int
-    stock_core_order_received: int
-    stock_core_order_processing: int
-    stock_core_order_processed: int
-    stock_core_order_status_sending: int
-    stock_core_order_status_send: int
-    broker_order_status_collector_status_received: int
-    broker_order_status_collector_status_sending: int
-    broker_order_status_collector_status_send: int
-    broker_core_status_received: int
-    broker_core_status_processing: int
-    broker_core_status_processed: int
-    broker_core_status_sending: int
-    broker_core_status_send: int
-    broker_data_streamer_status_received: int
-    broker_data_streamer_status_sending: int
-    broker_data_streamer_status_send: int
-    client_status_received: int
+    client_order_send: Optional[int] = field(default=None)
+    broker_facade_order_received: Optional[int] = field(default=None) 
+    broker_facade_order_sending: Optional[int] = field(default=None)
+    broker_facade_order_send: Optional[int] = field(default=None)
+    broker_core_order_received: Optional[int] = field(default=None)
+    broker_core_order_processing: Optional[int] = field(default=None)
+    broker_core_order_processed: Optional[int] = field(default=None)
+    broker_core_order_sending: Optional[int] = field(default=None)
+    broker_core_order_send: Optional[int] = field(default=None)
+    broker_order_executor_order_received: Optional[int] = field(default=None)
+    broker_order_executor_order_sending: Optional[int] = field(default=None)
+    broker_order_executor_order_send: Optional[int] = field(default=None)
+    stock_order_collector_order_received: Optional[int] = field(default=None)
+    stock_order_collector_order_sending: Optional[int] = field(default=None)
+    stock_order_collector_order_send: Optional[int] = field(default=None)
+    stock_core_order_received: Optional[int] = field(default=None)
+    stock_core_order_processing: Optional[int] = field(default=None)
+    stock_core_order_processed: Optional[int] = field(default=None)
+    stock_core_status_sending: Optional[int] = field(default=None)
+    stock_core_status_send: Optional[int] = field(default=None)
+    broker_order_status_collector_status_received: Optional[int] = field(default=None)
+    broker_order_status_collector_status_sending: Optional[int] = field(default=None)
+    broker_order_status_collector_status_send: Optional[int] = field(default=None)
+    broker_core_status_received: Optional[int] = field(default=None)
+    broker_core_status_processing: Optional[int] = field(default=None)
+    broker_core_status_processed: Optional[int] = field(default=None)
+    broker_core_status_sending: Optional[int] = field(default=None)
+    broker_core_status_send: Optional[int] = field(default=None)
+    broker_data_streamer_status_received: Optional[int] = field(default=None)
+    broker_data_streamer_status_sending: Optional[int] = field(default=None)
+    broker_data_streamer_status_send: Optional[int] = field(default=None)
+    client_status_received: Optional[int] = field(default=None)

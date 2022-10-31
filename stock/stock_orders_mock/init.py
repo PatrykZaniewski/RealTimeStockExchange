@@ -1,10 +1,11 @@
 import asyncio
+import base64
 import json
 import random
 import uuid
 from typing import Dict
 
-from google.cloud import pubsub_v1
+import aiohttp
 
 ASSETS_BOUNDS = {
     "ASSECO": [100.00, 150.00],
@@ -35,35 +36,44 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
 
 
 async def process_limit_order():
-    while True:
-        asyncio.create_task(publish(generate_order("ASSECO", "SELL", "LIMIT_ORDER")))
-        asyncio.create_task(publish(generate_order("ASSECO", "BUY", "LIMIT_ORDER")))
-        print("LIMIT_ORDER")
-        await asyncio.sleep(1)
+    asyncio.create_task(publish(generate_order("ASSECO", "SELL", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("ASSECO", "BUY", "LIMIT_ORDER")))
+    print("LIMIT_ORDER")
 
 
 async def process_market_order():
-    while True:
-        asyncio.create_task(publish(generate_order("ASSECO", "SELL", "MARKET_ORDER")))
-        asyncio.create_task(publish(generate_order("ASSECO", "BUY", "MARKET_ORDER")))
-        print("MARKET_ORDER")
-        await asyncio.sleep(1)
+    asyncio.create_task(publish(generate_order("ASSECO", "SELL", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("ASSECO", "BUY", "MARKET_ORDER")))
+    print("MARKET_ORDER")
 
 
 async def publish(data: Dict):
-    print(data['id'])
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
+    url = 'https://order-collector-dfksv3hpea-lm.a.run.app/order'
+    data = base64.b64encode(json.dumps(data).encode("ascii")).decode("ascii")
+    tmp = {
+        "message": {
+            "data": data,
+            "messageId": "6067377733834993",
+            "message_id": "6067377733834993",
+            "publishTime": "2022-10-24T19:18:35.84Z",
+            "publish_time": "2022-10-24T19:18:35.84Z"
+        },
+        "subscription": "projects/broker-366421/subscriptions/broker.internal.client_orders.sub"
+    }
 
-    future = publisher.publish(topic_path, json.dumps(data).encode("utf-8"))
-    future.result()
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url=url, data=json.dumps(tmp)):
+            print("order")
+            pass
 
 
 async def main():
-    await asyncio.gather(
-        # process_market_order(),
-        process_limit_order()
-    )
+    while True:
+        await asyncio.gather(
+            asyncio.sleep(2),
+            # process_market_order(),
+            process_limit_order()
+        )
 
 
 if __name__ == "__main__":

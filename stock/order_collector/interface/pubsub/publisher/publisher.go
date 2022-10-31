@@ -17,7 +17,7 @@ func PublishOrder(order *model.StockOrder) error {
 	projectId := pubSubConfig.Stock.ProjectId
 	topicId := pubSubConfig.Stock.Publisher.InternalOrdersTopicId
 
-	if order.ClientId != "mock_client" {
+	if order.ClientId != "mock_client" && order.BrokerId != "mock_broker" {
 		log.Printf("%s,STOCK_ORDER_COLLECTOR,ORDER_SENDING,%s", order.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}
 	err := publishMessage(projectId, topicId, order)

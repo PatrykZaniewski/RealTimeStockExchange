@@ -5,7 +5,6 @@ import uuid
 from typing import Dict
 
 import aiohttp
-from google.cloud import pubsub_v1
 
 ASSETS_BOUNDS = {
     "ASSECO": [100.00, 150.00],
@@ -36,11 +35,13 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
 async def process_limit_order():
     asyncio.create_task(publish(generate_order("ASSECO", "SELL", "LIMIT_ORDER")))
     asyncio.create_task(publish(generate_order("ASSECO", "BUY", "LIMIT_ORDER")))
+    print("LIMIT_ORDER")
 
 
 async def process_market_order():
     asyncio.create_task(publish(generate_order("ASSECO", "SELL", "MARKET_ORDER")))
     asyncio.create_task(publish(generate_order("ASSECO", "BUY", "MARKET_ORDER")))
+    print("MARKET_ORDER")
 
 
 async def publish(data: Dict):

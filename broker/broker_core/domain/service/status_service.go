@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"log"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -28,62 +29,73 @@ func PublishStatusOrder(orderStatus *model.OrderStatus) {
 		log.Printf("%s,BROKER_CORE,STATUS_PROCESSING,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}
 
-	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		ordersDoc, _ := tx.Get(ordersRef)
-		pendingOrdersDb, _ := ordersDoc.DataAt("pendingOrders")
+	var wg sync.WaitGroup
+	wg.Add(2)
 
-		var pendingOrders []*model.PendingOrder
-		pendingOrdersRaw, _ := json.Marshal(pendingOrdersDb)
-		json.Unmarshal(pendingOrdersRaw, &pendingOrders)
+	go func(wg *sync.WaitGroup) {
+		err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+			ordersDoc, _ := tx.Get(ordersRef)
+			pendingOrdersDb, _ := ordersDoc.DataAt("pendingOrders")
 
-		var newPendingOrders []interface{}
-		var orderToBeExecuted model.PendingOrder
+			var pendingOrders []*model.PendingOrder
+			pendingOrdersRaw, _ := json.Marshal(pendingOrdersDb)
+			json.Unmarshal(pendingOrdersRaw, &pendingOrders)
 
-		for _, s := range pendingOrders {
-			if s.Id != orderStatus.Id {
-				newPendingOrders = append(newPendingOrders, s)
-			} else {
-				orderToBeExecuted = *s
+			var newPendingOrders []interface{}
+			var orderToBeExecuted model.PendingOrder
+
+			for _, s := range pendingOrders {
+				if s.Id != orderStatus.Id {
+					newPendingOrders = append(newPendingOrders, s)
+				} else {
+					orderToBeExecuted = *s
+				}
 			}
-		}
 
-		executedOrders, _ := ordersDoc.DataAt("executedOrders")
+			executedOrders, _ := ordersDoc.DataAt("executedOrders")
 
-		_ = tx.Set(ordersRef, map[string]interface{}{
-			"executedOrders": append(executedOrders.([]interface{}), map[string]interface{}{
-				"assetName":      orderToBeExecuted.AssetName,
-				"clientId":       orderToBeExecuted.ClientId,
-				"id":             orderToBeExecuted.Id,
-				"orderPrice":     orderToBeExecuted.OrderPrice,
-				"executionPrice": orderStatus.ExecutionPrice,
-				"orderType":      orderToBeExecuted.OrderType,
-				"orderSubtype":   orderToBeExecuted.OrderSubtype,
-				"quantity":       orderToBeExecuted.Quantity,
-				"requestTime":    orderToBeExecuted.RequestTime,
-				"executionTime":  time.Now(),
-			}),
-			"pendingOrders": newPendingOrders,
-		}, firestore.MergeAll)
-		return nil
-	})
-
-	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		walletDoc, _ := tx.Get(walletRef)
-
-		clientAssetCount, _ := walletDoc.DataAt(orderStatus.AssetName)
-
-		if orderStatus.OrderType == "BUY" {
-			_ = tx.Set(walletRef, map[string]interface{}{
-				orderStatus.AssetName: clientAssetCount.(int64) + 1,
+			_ = tx.Set(ordersRef, map[string]interface{}{
+				"executedOrders": append(executedOrders.([]interface{}), map[string]interface{}{
+					"assetName":      orderToBeExecuted.AssetName,
+					"clientId":       orderToBeExecuted.ClientId,
+					"id":             orderToBeExecuted.Id,
+					"orderPrice":     orderToBeExecuted.OrderPrice,
+					"executionPrice": orderStatus.ExecutionPrice,
+					"orderType":      orderToBeExecuted.OrderType,
+					"orderSubtype":   orderToBeExecuted.OrderSubtype,
+					"quantity":       orderToBeExecuted.Quantity,
+					"requestTime":    orderToBeExecuted.RequestTime,
+					"executionTime":  time.Now(),
+				}),
+				"pendingOrders": newPendingOrders,
 			}, firestore.MergeAll)
-		} else {
-			_ = tx.Set(walletRef, map[string]interface{}{
-				orderStatus.AssetName: clientAssetCount.(int64) - 1,
-			}, firestore.MergeAll)
-		}
+			return nil
+		})
+		wg.Done()
+	}(&wg)
 
-		return nil
-	})
+	go func(wg *sync.WaitGroup) {
+		err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
+			walletDoc, _ := tx.Get(walletRef)
+
+			clientAssetCount, _ := walletDoc.DataAt(orderStatus.AssetName)
+
+			if orderStatus.OrderType == "BUY" {
+				_ = tx.Set(walletRef, map[string]interface{}{
+					orderStatus.AssetName: clientAssetCount.(int64) + 1,
+				}, firestore.MergeAll)
+			} else {
+				_ = tx.Set(walletRef, map[string]interface{}{
+					orderStatus.AssetName: clientAssetCount.(int64) - 1,
+				}, firestore.MergeAll)
+			}
+
+			return nil
+		})
+		wg.Done()
+	}(&wg)
+
+	wg.Wait()
 
 	if orderStatus.BrokerId != "mock_broker" && orderStatus.ClientId != "mock_client" {
 		log.Printf("%s,BROKER_CORE,STATUS_PROCESSED,%s", orderStatus.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))

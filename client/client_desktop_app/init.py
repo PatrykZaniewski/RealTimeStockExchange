@@ -36,9 +36,9 @@ async def generate_orders():
     tmp = json.dumps(order)
     # logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
     async with aiohttp.ClientSession() as session:
+        logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
         async with session.post(url='https://broker-facade-msdaaqs4fq-lm.a.run.app/order', headers={"identifier": "broker_client"}, data=tmp) as response:
-            if response.status == 200:
-                logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
+            pass
         # requests.post(url=f"http://localhost:5012/order", data=json.dumps(order), headers={"identifier": "broker_client"})
         # await asyncio.sleep(0.1)
 

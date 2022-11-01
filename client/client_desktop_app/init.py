@@ -31,7 +31,7 @@ async def hello():
 async def generate_orders():
     # for _ in range(10):
     id = str(uuid.uuid4())
-    order = {"assetName": "ASSECO", "quantity": 1, "orderType": "SELL", "orderSubtype": "MARKET_ORDER",
+    order = {"assetName": "ASSECO", "quantity": 1, "orderType": "BUY", "orderSubtype": "MARKET_ORDER",
              "orderPrice": 100.0, "id": id}
     tmp = json.dumps(order)
     # logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
@@ -46,6 +46,7 @@ async def generate_orders():
 async def main():
     for _ in range(10):
         asyncio.get_event_loop().create_task(generate_orders())
+        await asyncio.sleep(1)
     await hello()
 
 

@@ -128,7 +128,7 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 	var newPrice float64
 
 	orderExecute := func(t db.TransactionNode) (interface{}, error) {
-		var orders []*model.OrderBookOrder
+		var orders []model.OrderBookOrder
 		t.Unmarshal(&orders)
 		sort.Slice(orders, func(i, j int) bool {
 			if stockOrder.OrderType == "BUY" {
@@ -146,8 +146,7 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 			}
 
 		})
-
-		limitOrderToBeExecuted = *orders[0]
+		limitOrderToBeExecuted = orders[0]
 		newPrice = orders[1].Price
 		return orders[1:], nil
 	}

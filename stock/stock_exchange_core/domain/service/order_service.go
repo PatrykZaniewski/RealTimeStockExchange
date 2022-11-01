@@ -1,91 +1,87 @@
 package service
 
 import (
-	"cloud.google.com/go/firestore"
 	"context"
-	"encoding/json"
+	"firebase.google.com/go/v4"
+	"firebase.google.com/go/v4/db"
+	"google.golang.org/api/option"
 	"log"
-	"reflect"
 	"sort"
 	config "stock/stock_exchange_core/config/env"
 	"stock/stock_exchange_core/domain/model"
 	"stock/stock_exchange_core/interface/pubsub/publisher"
 	"strconv"
-	"sync"
 	"time"
 )
 
 func ProcessLimitOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *model.Price) {
 	firestoreStockConfig := config.AppConfig.Firestore.StockConfig
-	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectId)
-	orderBookRef := client.Collection("orderBook").Doc(stockOrder.AssetName)
 	newPrices := (*model.Price)(nil)
 	orderStatus := (*model.OrderStatus)(nil)
 
-	err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-		doc, _ := tx.Get(orderBookRef)
-		var ordersType string
-		if stockOrder.OrderType == "BUY" {
-			ordersType = "buyOrders"
-		} else {
-			ordersType = "sellOrders"
-		}
-		orders, _ := doc.DataAt(ordersType)
+	conf := &firebase.Config{
+		DatabaseURL: firestoreStockConfig.ProjectId,
+	}
+	app, _ := firebase.NewApp(ctx, conf, option.WithoutAuthentication())
+	client, _ := app.Database(ctx)
 
-		var currentBuyPriceTmp interface{}
-		var currentSellPriceTmp interface{}
+	buyOrdersRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/buyOrders")
+	sellOrdersRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/sellOrders")
+	buyPriceRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/buyPrice")
+	sellPriceRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/sellPrice")
 
-		var currentBuyPrice float64
-		var currentSellPrice float64
-		currentBuyPriceTmp, _ = doc.DataAt("buyPrice")
-		currentSellPriceTmp, _ = doc.DataAt("sellPrice")
-		if reflect.TypeOf(currentBuyPriceTmp).Kind() == reflect.Int64 {
-			currentBuyPrice = float64(currentBuyPriceTmp.(int64))
-		} else {
-			currentBuyPrice = currentBuyPriceTmp.(float64)
-		}
-		if reflect.TypeOf(currentSellPriceTmp).Kind() == reflect.Int64 {
-			currentSellPrice = float64(currentSellPriceTmp.(int64))
-		} else {
-			currentSellPrice = currentSellPriceTmp.(float64)
-		}
+	orderBookAdd := func(t db.TransactionNode) (interface{}, error) {
+		var currentValue []interface{}
+		t.Unmarshal(&currentValue)
+		return append(currentValue, map[string]interface{}{
+			"brokerId":    stockOrder.BrokerId,
+			"clientId":    stockOrder.ClientId,
+			"id":          stockOrder.Id,
+			"price":       stockOrder.OrderPrice,
+			"quantity":    stockOrder.Quantity,
+			"requestTime": time.Now(),
+		}), nil
+	}
 
-		var priceChanged = false
-		if stockOrder.OrderType == "BUY" && stockOrder.OrderPrice > currentSellPrice {
-			currentSellPrice = stockOrder.OrderPrice
+	var priceChanged = false
+
+	priceUpdate := func(t db.TransactionNode) (interface{}, error) {
+		var currentValue float64
+		t.Unmarshal(&currentValue)
+
+		if stockOrder.OrderType == "BUY" && stockOrder.OrderPrice > currentValue {
 			priceChanged = true
+			return stockOrder.OrderPrice, nil
 		}
 
-		if stockOrder.OrderType == "SELL" && stockOrder.OrderPrice < currentBuyPrice {
-			currentBuyPrice = stockOrder.OrderPrice
+		if stockOrder.OrderType == "SELL" && stockOrder.OrderPrice < currentValue {
 			priceChanged = true
+			return stockOrder.OrderPrice, nil
 		}
 
-		if priceChanged {
-			newPrices = &model.Price{
-				AssetName: stockOrder.AssetName,
-				SellPrice: currentSellPrice,
-				BuyPrice:  currentBuyPrice,
-			}
+		return currentValue, nil
+	}
+
+	if stockOrder.OrderType == "BUY" {
+		buyOrdersRef.Transaction(ctx, orderBookAdd)
+		sellPriceRef.Transaction(ctx, priceUpdate)
+	} else {
+		sellOrdersRef.Transaction(ctx, orderBookAdd)
+		buyPriceRef.Transaction(ctx, priceUpdate)
+	}
+
+	if priceChanged {
+		var sellPrice float64
+		var buyPrice float64
+		sellPriceRef.Get(ctx, &sellPrice)
+		buyPriceRef.Get(ctx, &buyPrice)
+		newPrices = &model.Price{
+			AssetName: stockOrder.AssetName,
+			SellPrice: sellPrice,
+			BuyPrice:  buyPrice,
 		}
-
-		_ = tx.Set(orderBookRef, map[string]interface{}{
-			ordersType: append(orders.([]interface{}), map[string]interface{}{
-				"brokerId":    stockOrder.BrokerId,
-				"clientId":    stockOrder.ClientId,
-				"id":          stockOrder.Id,
-				"price":       stockOrder.OrderPrice,
-				"quantity":    stockOrder.Quantity,
-				"requestTime": time.Now(),
-			}),
-			"sellPrice": currentSellPrice,
-			"buyPrice":  currentBuyPrice,
-		}, firestore.MergeAll)
-
-		return nil
-	})
+	}
 
 	orderStatus = &model.OrderStatus{
 		AssetName:      stockOrder.AssetName,
@@ -100,30 +96,28 @@ func ProcessLimitOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *model
 		Status:         model.CREATED,
 	}
 
-	if err != nil {
-		log.Printf("An error has occurred: %s", err)
-	}
-	defer client.Close()
-
 	return orderStatus, newPrices
 }
 
 func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *model.OrderStatus, *model.Price) {
 	firestoreStockConfig := config.AppConfig.Firestore.StockConfig
-	projectId := firestoreStockConfig.ProjectId
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectId)
-	orderBookRef := client.Collection("orderBook").Doc(stockOrder.AssetName)
-	archiveRef := client.Collection("archiveOrders").Doc(stockOrder.AssetName)
+
+	conf := &firebase.Config{
+		DatabaseURL: firestoreStockConfig.ProjectId,
+	}
+	app, _ := firebase.NewApp(ctx, conf, option.WithoutAuthentication())
+	client, _ := app.Database(ctx)
+
+	buyOrdersRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/buyOrders")
+	sellOrdersRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/sellOrders")
+	buyPriceRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/buyPrice")
+	sellPriceRef := client.NewRef("orderBook/" + stockOrder.AssetName + "/sellPrice")
+	archiveRef := client.NewRef("archiveOrders/" + stockOrder.AssetName)
+
 	newPrices := (*model.Price)(nil)
 	triggeringOrderStatus := (*model.OrderStatus)(nil)
 	triggeredOrderStatus := (*model.OrderStatus)(nil)
-	var ordersType string
-	if stockOrder.OrderType == "BUY" {
-		ordersType = "sellOrders"
-	} else {
-		ordersType = "buyOrders"
-	}
 
 	var limitOrderToBeExecuted model.OrderBookOrder
 
@@ -131,152 +125,117 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 		log.Printf("%s,STOCK_CORE,ORDER_PROCESSING,%s", stockOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	var newPrice float64
 
-	go func(wg *sync.WaitGroup) {
-		err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-			orderBookDoc, _ := tx.Get(orderBookRef)
-
-			var priceType string
+	orderExecute := func(t db.TransactionNode) (interface{}, error) {
+		var orders []*model.OrderBookOrder
+		t.Unmarshal(&orders)
+		sort.Slice(orders, func(i, j int) bool {
 			if stockOrder.OrderType == "BUY" {
-				priceType = "buyPrice"
-			} else {
-				priceType = "sellPrice"
-			}
-
-			var orders []*model.OrderBookOrder
-			ordersDb, _ := orderBookDoc.DataAt(ordersType)
-			ordersRaw, _ := json.Marshal(ordersDb)
-			json.Unmarshal(ordersRaw, &orders)
-
-			sort.Slice(orders, func(i, j int) bool {
-				if stockOrder.OrderType == "BUY" {
-					if orders[i].Price == orders[j].Price {
-						return orders[i].RequestTime.Before(orders[j].RequestTime)
-					} else {
-						return orders[i].Price < orders[j].Price
-					}
+				if orders[i].Price == orders[j].Price {
+					return orders[i].RequestTime.Before(orders[j].RequestTime)
 				} else {
-					if orders[i].Price == orders[j].Price {
-						return orders[i].RequestTime.Before(orders[j].RequestTime)
-					} else {
-						return orders[i].Price > orders[j].Price
-					}
+					return orders[i].Price < orders[j].Price
 				}
-
-			})
-
-			limitOrderToBeExecuted = *orders[0]
-
-			_ = tx.Set(orderBookRef, map[string]interface{}{
-				ordersType: orders[1:],
-				priceType:  orders[1].Price,
-			}, firestore.MergeAll)
-
-			if stockOrder.OrderType == "BUY" {
-				data, _ := orderBookDoc.DataAt("sellPrice")
-				var currentSellPrice float64
-				if reflect.TypeOf(data).Kind() == reflect.Int64 {
-					currentSellPrice = float64(data.(int64))
-				} else if reflect.TypeOf(data).Kind() == reflect.Float64 {
-					currentSellPrice = data.(float64)
-				}
-				newPrices = &model.Price{
-					AssetName: stockOrder.AssetName,
-					BuyPrice:  orders[1].Price,
-					SellPrice: currentSellPrice,
-				}
-			}
-
-			if stockOrder.OrderType == "SELL" {
-				data, _ := orderBookDoc.DataAt("buyPrice")
-				var currentBuyPrice float64
-				if reflect.TypeOf(data).Kind() == reflect.Int64 {
-					currentBuyPrice = float64(data.(int64))
-				} else if reflect.TypeOf(data).Kind() == reflect.Float64 {
-					currentBuyPrice = data.(float64)
-				}
-				newPrices = &model.Price{
-					AssetName: stockOrder.AssetName,
-					BuyPrice:  currentBuyPrice,
-					SellPrice: orders[1].Price,
-				}
-			}
-
-			triggeringOrderStatus = &model.OrderStatus{
-				AssetName:      stockOrder.AssetName,
-				Quantity:       stockOrder.Quantity,
-				OrderType:      stockOrder.OrderType,
-				OrderSubtype:   stockOrder.OrderSubtype,
-				OrderPrice:     stockOrder.OrderPrice,
-				ExecutionPrice: limitOrderToBeExecuted.Price,
-				ClientId:       stockOrder.ClientId,
-				BrokerId:       stockOrder.BrokerId,
-				Id:             stockOrder.Id,
-				Status:         model.FULFILLED,
-			}
-
-			var triggeredOrderType string
-
-			if stockOrder.OrderType == "BUY" {
-				triggeredOrderType = "SELL"
 			} else {
-				triggeredOrderType = "BUY"
+				if orders[i].Price == orders[j].Price {
+					return orders[i].RequestTime.Before(orders[j].RequestTime)
+				} else {
+					return orders[i].Price > orders[j].Price
+				}
 			}
 
-			triggeredOrderStatus = &model.OrderStatus{
-				AssetName:      stockOrder.AssetName,
-				Quantity:       limitOrderToBeExecuted.Quantity,
-				OrderType:      triggeredOrderType,
-				OrderSubtype:   "MARKET_ORDER",
-				OrderPrice:     limitOrderToBeExecuted.Price,
-				ExecutionPrice: limitOrderToBeExecuted.Price,
-				ClientId:       limitOrderToBeExecuted.ClientId,
-				BrokerId:       limitOrderToBeExecuted.BrokerId,
-				Id:             limitOrderToBeExecuted.Id,
-				Status:         model.FULFILLED,
-			}
-
-			return nil
 		})
-		wg.Done()
-	}(&wg)
 
-	go func(wg *sync.WaitGroup) {
-		err = client.RunTransaction(ctx, func(ctx context.Context, tx *firestore.Transaction) error {
-			docs, _ := tx.GetAll([]*firestore.DocumentRef{archiveRef})
-			archiveOrdersDoc := docs[0]
-			archiveOrders, _ := archiveOrdersDoc.DataAt(ordersType)
+		limitOrderToBeExecuted = *orders[0]
+		newPrice = orders[1].Price
+		return orders[1:], nil
+	}
 
-			limitOrderToBeExecutedMap := map[string]interface{}{
-				"brokerId":      limitOrderToBeExecuted.BrokerId,
-				"clientId":      limitOrderToBeExecuted.ClientId,
-				"id":            limitOrderToBeExecuted.Id,
-				"price":         limitOrderToBeExecuted.Price,
-				"quantity":      limitOrderToBeExecuted.Quantity,
-				"requestTime":   limitOrderToBeExecuted.RequestTime,
-				"executionTime": time.Now(),
-			}
+	updatePrice := func(t db.TransactionNode) (interface{}, error) {
+		return newPrice, nil
+	}
 
-			upcomingOrderToBeExecutedMap := map[string]interface{}{
-				"brokerId":      stockOrder.BrokerId,
-				"clientId":      stockOrder.ClientId,
-				"id":            stockOrder.Id,
-				"price":         stockOrder.OrderPrice,
-				"quantity":      stockOrder.Quantity,
-				"requestTime":   time.Now(),
-				"executionTime": time.Now(),
-			}
+	limitOrderToBeExecutedMap := map[string]interface{}{
+		"brokerId":      limitOrderToBeExecuted.BrokerId,
+		"clientId":      limitOrderToBeExecuted.ClientId,
+		"id":            limitOrderToBeExecuted.Id,
+		"price":         limitOrderToBeExecuted.Price,
+		"quantity":      limitOrderToBeExecuted.Quantity,
+		"requestTime":   limitOrderToBeExecuted.RequestTime,
+		"executionTime": time.Now(),
+	}
 
-			_ = tx.Set(archiveRef, map[string]interface{}{
-				ordersType: append(archiveOrders.([]interface{}), []interface{}{limitOrderToBeExecutedMap, upcomingOrderToBeExecutedMap}...),
-			}, firestore.MergeAll)
+	upcomingOrderToBeExecutedMap := map[string]interface{}{
+		"brokerId":      stockOrder.BrokerId,
+		"clientId":      stockOrder.ClientId,
+		"id":            stockOrder.Id,
+		"price":         stockOrder.OrderPrice,
+		"quantity":      stockOrder.Quantity,
+		"requestTime":   time.Now(),
+		"executionTime": time.Now(),
+	}
 
-			return nil
-		})
-		wg.Done()
-	}(&wg)
+	updateArchive := func(t db.TransactionNode) (interface{}, error) {
+		var currentValue []interface{}
+		t.Unmarshal(&currentValue)
+
+		return append(currentValue, []interface{}{limitOrderToBeExecutedMap, upcomingOrderToBeExecutedMap}...), nil
+	}
+
+	if stockOrder.OrderType == "BUY" {
+		sellOrdersRef.Transaction(ctx, orderExecute)
+		buyPriceRef.Transaction(ctx, updatePrice)
+	} else {
+		buyOrdersRef.Transaction(ctx, orderExecute)
+		sellPriceRef.Transaction(ctx, updatePrice)
+	}
+	archiveRef.Transaction(ctx, updateArchive)
+
+	var newBuyPrice float64
+	var newSellPrice float64
+	buyPriceRef.Get(ctx, &newBuyPrice)
+	sellPriceRef.Get(ctx, &newSellPrice)
+
+	newPrices = &model.Price{
+		AssetName: stockOrder.AssetName,
+		SellPrice: newSellPrice,
+		BuyPrice:  newBuyPrice,
+	}
+
+	triggeringOrderStatus = &model.OrderStatus{
+		AssetName:      stockOrder.AssetName,
+		Quantity:       stockOrder.Quantity,
+		OrderType:      stockOrder.OrderType,
+		OrderSubtype:   stockOrder.OrderSubtype,
+		OrderPrice:     stockOrder.OrderPrice,
+		ExecutionPrice: limitOrderToBeExecuted.Price,
+		ClientId:       stockOrder.ClientId,
+		BrokerId:       stockOrder.BrokerId,
+		Id:             stockOrder.Id,
+		Status:         model.FULFILLED,
+	}
+
+	var triggeredOrderType string
+
+	if stockOrder.OrderType == "BUY" {
+		triggeredOrderType = "SELL"
+	} else {
+		triggeredOrderType = "BUY"
+	}
+
+	triggeredOrderStatus = &model.OrderStatus{
+		AssetName:      stockOrder.AssetName,
+		Quantity:       limitOrderToBeExecuted.Quantity,
+		OrderType:      triggeredOrderType,
+		OrderSubtype:   "MARKET_ORDER",
+		OrderPrice:     limitOrderToBeExecuted.Price,
+		ExecutionPrice: limitOrderToBeExecuted.Price,
+		ClientId:       limitOrderToBeExecuted.ClientId,
+		BrokerId:       limitOrderToBeExecuted.BrokerId,
+		Id:             limitOrderToBeExecuted.Id,
+		Status:         model.FULFILLED,
+	}
 
 	//firstBrokerRef := client.Collection("brokers").Doc(triggeringOrderStatus.BrokerId)
 	//secondBrokerRef := client.Collection("brokers").Doc(triggeredOrderStatus.BrokerId)
@@ -313,17 +272,9 @@ func ProcessMarketOrder(stockOrder *model.StockOrder) (*model.OrderStatus, *mode
 	//	return nil
 	//})
 
-	wg.Wait()
-
 	if stockOrder.BrokerId != "mock_broker" && stockOrder.ClientId != "mock_client" {
 		log.Printf("%s,STOCK_CORE,ORDER_PROCESSED,%s", stockOrder.Id, strconv.FormatInt(time.Now().UnixMicro(), 10))
 	}
-
-	if err != nil {
-		// Handle any errors appropriately in this section.
-		log.Printf("An error has occurred: %s", err)
-	}
-	defer client.Close()
 
 	if newPrices != nil {
 		publisher.PublishPrices(newPrices)
@@ -339,7 +290,6 @@ func ProcessOrder(stockOrder *model.StockOrder) {
 	case "LIMIT_ORDER":
 		_, _ = ProcessLimitOrder(stockOrder)
 		//publisher.PublishOrderStatus(orderStatus)
-		//fmt.Println("WYSZLO")
 		break
 	case "MARKET_ORDER":
 		triggeringOrderStatus, _, _ := ProcessMarketOrder(stockOrder)

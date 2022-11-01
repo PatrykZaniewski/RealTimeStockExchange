@@ -1,6 +1,6 @@
 firestore:
   stock:
-    projectId: angelic-bond-366421
+    projectId: https://angelic-bond-366421.firebaseio.com
 
 pubsub:
   listenerType: pull

@@ -26,9 +26,9 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
         "quantity": 1,
         "orderType": order_type,
         "orderSubtype": order_subtype,
-        "orderPrice": round(random.uniform(float(upper_bound), float(upper_bound) + 15.00), 2)
+        "orderPrice": round(random.uniform(float(lower_bound), float(lower_bound) + 15.00), 2)
         if order_type == "BUY" else round(
-            random.uniform(float(lower_bound) - 15.00, float(lower_bound)), 2),
+            random.uniform(float(upper_bound) - 15.00, float(upper_bound)), 2),
         "clientId": "mock_client_2",
         "brokerId": "mock_broker",
         "id": str(uuid.uuid4())
@@ -38,12 +38,20 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
 async def process_limit_order():
     asyncio.create_task(publish(generate_order("ASSECO", "SELL", "LIMIT_ORDER")))
     asyncio.create_task(publish(generate_order("ASSECO", "BUY", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "SELL", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "BUY", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "SELL", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "BUY", "LIMIT_ORDER")))
     print("LIMIT_ORDER")
 
 
 async def process_market_order():
     asyncio.create_task(publish(generate_order("ASSECO", "SELL", "MARKET_ORDER")))
     asyncio.create_task(publish(generate_order("ASSECO", "BUY", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "SELL", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "BUY", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "SELL", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "BUY", "MARKET_ORDER")))
     print("MARKET_ORDER")
 
 

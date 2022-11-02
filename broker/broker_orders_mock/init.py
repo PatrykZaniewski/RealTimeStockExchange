@@ -24,9 +24,9 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
         "quantity": 1,
         "orderType": order_type,
         "orderSubtype": order_subtype,
-        "orderPrice": round(random.uniform(float(upper_bound), float(upper_bound) + 15.00), 2)
+        "orderPrice": round(random.uniform(float(lower_bound), float(lower_bound) + 15.00), 2)
         if order_type == "BUY" else round(
-            random.uniform(float(lower_bound) - 15.00, float(lower_bound)), 2),
+            random.uniform(float(upper_bound) - 15.00, float(upper_bound)), 2),
         "clientId": "mock_client",
         "id": str(uuid.uuid4())
     }

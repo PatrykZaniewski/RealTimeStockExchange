@@ -50,14 +50,17 @@ async def main():
     await hello()
 
 
+def run_gui():
+    app = QApplication([])
+    app.setQuitOnLastWindowClosed(True)
+    window = MainWindow()
+    load_dotenv(dotenv_path="./settings.env")
+    qclient = QClient(app)
+    app.exec_()
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
-    # app = QApplication([])
-    # app.setQuitOnLastWindowClosed(True)
-    # window = MainWindow()
-    # load_dotenv(dotenv_path="./settings.env")
-    # qclient = QClient(app)
-    # app.exec_()
-    # sys.exit(ret)
-    #
-    asyncio.get_event_loop().run_until_complete(main())
+
+    run_gui()
+    # asyncio.get_event_loop().run_until_complete(main())

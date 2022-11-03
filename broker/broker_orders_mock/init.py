@@ -12,7 +12,7 @@ ASSETS_BOUNDS = {
     "CDPROJECT": [25.00, 50.00]
 }
 
-FACADE_URL = "http://localhost:5012/order"
+FACADE_URL = "https://broker-facade-msdaaqs4fq-lm.a.run.app/order"
 
 
 def generate_order(asset_name: str, order_type: str, order_subtype: str):
@@ -35,18 +35,26 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
 async def process_limit_order():
     asyncio.create_task(publish(generate_order("ASSECO", "SELL", "LIMIT_ORDER")))
     asyncio.create_task(publish(generate_order("ASSECO", "BUY", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "SELL", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "BUY", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "SELL", "LIMIT_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "BUY", "LIMIT_ORDER")))
     print("LIMIT_ORDER")
 
 
 async def process_market_order():
     asyncio.create_task(publish(generate_order("ASSECO", "SELL", "MARKET_ORDER")))
     asyncio.create_task(publish(generate_order("ASSECO", "BUY", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "SELL", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("COMARCH", "BUY", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "SELL", "MARKET_ORDER")))
+    asyncio.create_task(publish(generate_order("CDPROJECT", "BUY", "MARKET_ORDER")))
     print("MARKET_ORDER")
 
 
 async def publish(data: Dict):
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=FACADE_URL, data=json.dumps(data), headers={"identifier": "mock_client"}):
+        async with session.post(url=FACADE_URL, data=json.dumps(data), headers={"identifier": "mock_client_1"}):
             print("order")
             pass
 

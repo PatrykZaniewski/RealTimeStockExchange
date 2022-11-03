@@ -40,7 +40,7 @@ def read_timestamps():
     processing_timestamps: Dict[str, ProcessingTimestamps] = {}
     read_specified_cloud_timestamp('broker.json', processing_timestamps)
     read_specified_cloud_timestamp('stock.json', processing_timestamps)
-    read_client_timestamp('client.json', processing_timestamps)
+    read_client_timestamp('client.txt', processing_timestamps)
     return processing_timestamps
 
 
@@ -49,7 +49,7 @@ def generate_processing_results(timestamps: List[ProcessingTimestamps]):
     for timestamp in timestamps:
         results.append(ProcessingResults(
             client_broker_facade_communication=int(
-                timestamp.broker_facade_order_received - timestamp.client_order_send),
+                abs(timestamp.broker_facade_order_received - timestamp.client_order_send)),
             broker_facade_processing=int(((
                                                   timestamp.broker_facade_order_send + timestamp.broker_facade_order_sending)/2) - timestamp.broker_facade_order_received),
             broker_facade_messaging = int((timestamp.broker_facade_order_send - timestamp.broker_facade_order_sending)/2),
@@ -104,7 +104,6 @@ def generate_processing_results(timestamps: List[ProcessingTimestamps]):
 def run_calculations():
     timestamps: Dict[str, ProcessingTimestamps] = read_timestamps()
     results = generate_processing_results(list(timestamps.values()))
-    a = 5
     tmp: Dict[str, List[int]] = {}
     for result in results:
         for k, v in result.__dict__.items():
@@ -114,6 +113,9 @@ def run_calculations():
 
     agg = AggregatedProcessingResults()
     for k, v in tmp.items():
+        # v.remove(max(v))
+        # v.remove(min(v))
+
         min_time = min(v)
         max_time = max(v)
         avg_time = int(mean(v))

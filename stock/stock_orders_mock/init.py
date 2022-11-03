@@ -29,7 +29,7 @@ def generate_order(asset_name: str, order_type: str, order_subtype: str):
         "orderPrice": round(random.uniform(float(lower_bound), float(lower_bound) + 15.00), 2)
         if order_type == "BUY" else round(
             random.uniform(float(upper_bound) - 15.00, float(upper_bound)), 2),
-        "clientId": "mock_client_2",
+        "clientId": "mock_client",
         "brokerId": "mock_broker",
         "id": str(uuid.uuid4())
     }
@@ -79,7 +79,7 @@ async def main():
     while True:
         await asyncio.gather(
             asyncio.sleep(2),
-            # process_market_order(),
+            process_market_order(),
             process_limit_order()
         )
 

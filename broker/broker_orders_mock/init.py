@@ -1,6 +1,7 @@
 import asyncio
 import json
 import random
+import time
 import uuid
 from typing import Dict
 
@@ -54,17 +55,19 @@ async def process_market_order():
 
 async def publish(data: Dict):
     async with aiohttp.ClientSession() as session:
-        async with session.post(url=FACADE_URL, data=json.dumps(data), headers={"identifier": "mock_client_1"}):
+        async with session.post(url=FACADE_URL, data=json.dumps(data), headers={"identifier": "mock_client"}):
             print("order")
             pass
 
 
 async def main():
+    # time.sleep(2)
     while True:
         await asyncio.gather(
             asyncio.sleep(2),
+            process_limit_order(),
             process_market_order(),
-            process_limit_order()
+            # process_limit_order(),
         )
 
 

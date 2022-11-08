@@ -18,6 +18,7 @@ from client.client_desktop_app.websocket_setup import QClient
 async def hello():
     async with websockets.connect("ws://broker-366421.ew.r.appspot.com/ws",
                                   extra_headers={"identifier": "broker_client"}) as websocket:
+        await websocket.send("broker_client")
         while True:
             await websocket.send("broker_client")
             message = await websocket.recv()
@@ -31,7 +32,7 @@ async def hello():
 async def generate_orders():
     # for _ in range(10):
     id = str(uuid.uuid4())
-    order = {"assetName": "ASSECO", "quantity": 1, "orderType": "BUY", "orderSubtype": "MARKET_ORDER",
+    order = {"assetName": "ASSECO", "quantity": 1, "orderType": "SELL", "orderSubtype": "MARKET_ORDER",
              "orderPrice": 100.0, "id": id}
     tmp = json.dumps(order)
     # logging.info(f'{id},CLIENT,ORDER_SEND,{int(time.time() * 1000000)}')
@@ -44,10 +45,14 @@ async def generate_orders():
 
 
 async def main():
-    for _ in range(10):
+    asyncio.get_event_loop().create_task(hello())
+    # time.sleep(3)
+    # await asyncio.sleep(3)
+    for _ in range(12):
         asyncio.get_event_loop().create_task(generate_orders())
-        await asyncio.sleep(1)
-    await hello()
+        await asyncio.sleep(0.5)
+    while True:
+        await asyncio.sleep(0)
 
 
 def run_gui():
@@ -62,5 +67,6 @@ def run_gui():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 
-    run_gui()
-    # asyncio.get_event_loop().run_until_complete(main())
+    # run_gui()
+    time.sleep(10)
+    asyncio.get_event_loop().run_until_complete(main())

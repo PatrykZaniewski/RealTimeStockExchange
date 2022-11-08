@@ -113,8 +113,8 @@ def run_calculations():
 
     agg = AggregatedProcessingResults()
     for k, v in tmp.items():
-        # v.remove(max(v))
-        # v.remove(min(v))
+        v.remove(max(v))
+        v.remove(min(v))
 
         min_time = min(v)
         max_time = max(v)

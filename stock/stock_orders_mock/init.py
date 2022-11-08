@@ -2,6 +2,7 @@ import asyncio
 import base64
 import json
 import random
+import time
 import uuid
 from typing import Dict
 
@@ -76,11 +77,13 @@ async def publish(data: Dict):
 
 
 async def main():
+    # time.sleep(2)
     while True:
         await asyncio.gather(
-            asyncio.sleep(2),
-            process_market_order(),
-            process_limit_order()
+            asyncio.sleep(1),
+            process_limit_order(),
+            process_limit_order(),
+            process_market_order()
         )
 
 

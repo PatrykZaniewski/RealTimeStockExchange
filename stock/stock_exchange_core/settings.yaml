@@ -1,6 +1,6 @@
 firestore:
   stock:
-    projectId: angelic-bond-366421
+    projectId: https://angelic-bond-366421-18971.europe-west1.firebasedatabase.app/
 
 pubsub:
   listenerType: pull

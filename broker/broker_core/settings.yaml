@@ -1,6 +1,6 @@
 firestore:
   broker:
-    projectId: broker-366421
+    projectId: https://broker-366421-default-rtdb.europe-west1.firebasedatabase.app/
 
 pubsub:
   listenerType: pull
